@@ -1,0 +1,8 @@
+/target/
+/bin/
+.idea/
+.classpath
+.project
+.settings
+**/resources/webjars/
+**/maven
