@@ -1,7 +1,9 @@
 package org.vaadin.gatanaso;
 
-import com.vaadin.flow.component.AbstractField;
+import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
@@ -19,36 +21,43 @@ import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 
 import java.util.Collections;
-import java.util.List;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Tag("multiselect-combo-box")
 @HtmlImport("bower_components/multiselect-combo-box/multiselect-combo-box.html")
 public class MultiselectComboBox<T>
-        extends AbstractField<MultiselectComboBox<T>, Set<T>>
-        implements HasDataProvider<T>, HasSize {
+        extends AbstractSinglePropertyField<MultiselectComboBox<T>, Set<T>>
+        implements HasStyle, HasSize, HasValidation,
+        HasDataProvider<T> {
+
+    public static final String KEY_ATTRIBUTE = "key";
+    public static final String LABEL_ATTRIBUTE = "label";
 
     private ItemLabelGenerator<T> itemLabelGenerator = String::valueOf;
 
-    private DataProvider<T, ?> dataProvider;
-    private final KeyMapper<T> keyMapper = new KeyMapper<>();
+    private DataProvider<T, ?> dataProvider = DataProvider.ofItems();
+
+    private final KeyMapper<T> keyMapper = new KeyMapper<>(this::getItemId);
 
     private final CompositeDataGenerator<T> dataGenerator = new CompositeDataGenerator<>();
     private Registration dataProviderListenerRegistration;
 
     public MultiselectComboBox() {
-        super(Collections.emptySet());
+        super("selectedItems",
+            Collections.emptySet(),
+            JsonArray.class,
+            MultiselectComboBox::presentationToModel,
+            MultiselectComboBox::modelToPresentation);
 
-        dataGenerator.addDataGenerator((item, jsonObject) -> jsonObject
-                .put("label", generateLabel(item)));
+        dataGenerator.addDataGenerator((item, jsonObject) -> jsonObject.put(LABEL_ATTRIBUTE, generateLabel(item)));
 
-        setItemIdPath("key");
-        setItemValuePath("key");
-        setItemLabelPath("label");
+        setItemIdPath(KEY_ATTRIBUTE);
+        setItemValuePath(KEY_ATTRIBUTE);
+        setItemLabelPath(LABEL_ATTRIBUTE);
     }
 
     /**
@@ -57,7 +66,7 @@ public class MultiselectComboBox<T>
      * @return the label property of the multiselect-combo-box.
      */
     public String getLabel() {
-        return getElement().getProperty("label");
+        return getElement().getProperty(LABEL_ATTRIBUTE);
     }
 
     /**
@@ -67,7 +76,7 @@ public class MultiselectComboBox<T>
      *            the String value to set.
      */
     public void setLabel(String label) {
-        getElement().setProperty("label", label == null ? "" : label);
+        getElement().setProperty(LABEL_ATTRIBUTE, label == null ? "" : label);
     }
 
     /**
@@ -95,8 +104,7 @@ public class MultiselectComboBox<T>
      *            the String value to set.
      */
     public void setPlaceholder(String placeholder) {
-        getElement().setProperty("placeholder",
-                placeholder == null ? "" : placeholder);
+        getElement().setProperty("placeholder", placeholder == null ? "" : placeholder);
     }
 
     /**
@@ -142,6 +150,7 @@ public class MultiselectComboBox<T>
      *
      * @return true if the component is invalid, false otherwise.
      */
+    @Override
     @Synchronize(property = "invalid", value = "invalid-changed")
     public boolean isInvalid() {
         return getElement().getProperty("invalid", false);
@@ -153,6 +162,7 @@ public class MultiselectComboBox<T>
      * @param invalid
      *            the boolean value to set.
      */
+    @Override
     public void setInvalid(boolean invalid) {
         getElement().setProperty("invalid", invalid);
     }
@@ -174,52 +184,21 @@ public class MultiselectComboBox<T>
      * @param errorMessage
      *            the String value to set
      */
+    @Override
     public void setErrorMessage(String errorMessage) {
-        getElement().setProperty("errorMessage",
-                errorMessage == null ? "" : errorMessage);
+        getElement().setProperty("errorMessage", errorMessage == null ? "" : errorMessage);
     }
 
-    /**
-     * <p>
-     * Path for the value of the item. If {@code items} is an array of objects,
-     * the {@code itemValuePath} is used to fetch the string value for the
-     * selected item.
-     * </p>
-     * <p>
-     * The item value is used in the {@code value} property of the combo box, to
-     * provide the form value.
-     * </p>
-     *
-     * @param itemValuePath
-     *            the String value to set
-     */
-    public void setItemValuePath(String itemValuePath) {
-        getElement().setProperty("itemValuePath",
-                itemValuePath == null ? "" : itemValuePath);
+    private void setItemValuePath(String itemValuePath) {
+        getElement().setProperty("itemValuePath", itemValuePath == null ? "" : itemValuePath);
     }
 
-    /**
-     * <p>
-     * Path for the label of the item. If {@code items} is an array of objects,
-     * the {@code itemLabelPath} is used to fetch the string value for the label
-     * of the selected item.
-     * </p>
-     * <p>
-     * The item label is used in the multislect-combo-box, as the item display
-     * value.
-     * </p>
-     *
-     * @param itemLabelPath
-     *            the String value to set
-     */
-    public void setItemLabelPath(String itemLabelPath) {
-        getElement().setProperty("itemLabelPath",
-                itemLabelPath == null ? "" : itemLabelPath);
+    private void setItemLabelPath(String itemLabelPath) {
+        getElement().setProperty("itemLabelPath", itemLabelPath == null ? "" : itemLabelPath);
     }
 
     private void setItemIdPath(String itemIdPath) {
-        getElement().setProperty("itemIdPath",
-                itemIdPath == null ? "" : itemIdPath);
+        getElement().setProperty("itemIdPath", itemIdPath == null ? "" : itemIdPath);
     }
 
     protected void setItems(JsonArray items) {
@@ -228,6 +207,17 @@ public class MultiselectComboBox<T>
 
     protected void setSelectedItems(JsonArray items) {
         getElement().setPropertyJson("selectedItems", items);
+    }
+
+    /**
+     * Gets the item label generator.
+     *
+     * By default, {@link String#valueOf(Object)} is used.
+     *
+     * @return the item label generator.
+     */
+    public ItemLabelGenerator<T> getItemLabelGenerator() {
+        return itemLabelGenerator;
     }
 
     /**
@@ -240,72 +230,45 @@ public class MultiselectComboBox<T>
      */
     public void setItemLabelGenerator(
             ItemLabelGenerator<T> itemLabelGenerator) {
-        Objects.requireNonNull(itemLabelGenerator,
-                "The item label generator can not be null");
+        Objects.requireNonNull(itemLabelGenerator, "The item label generator can not be null");
         this.itemLabelGenerator = itemLabelGenerator;
+        reset();
     }
 
-    public ItemLabelGenerator<T> getItemLabelGenerator() {
-        return itemLabelGenerator;
-    }
-
-    @Override
-    protected void setPresentationValue(Set<T> newPresentationValue) {
-        setValue(newPresentationValue);
-    }
-
-    public void setValue(Set<T> value) {
-        Set<T> nullSafeValue = Optional.ofNullable(value)
-                .orElse(getEmptyValue());
-        setSelectedItems(convertToJsonArray(nullSafeValue.stream()));
-        super.setValue(nullSafeValue);
+    /**
+     * Gets the data provider.
+     *
+     * @return the data provider, not {@code null}
+     */
+    public DataProvider<T, ?> getDataProvider() {
+        return dataProvider;
     }
 
     @Override
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
-        Objects.requireNonNull(dataProvider,
-                "The data provider can not be null");
+        Objects.requireNonNull(dataProvider, "The data provider can not be null");
         this.dataProvider = dataProvider;
-        dataProviderUpdated();
-        setValue(getEmptyValue());
+        reset();
         updateDataProviderListenerRegistration();
+    }
+
+    private void reset() {
+        keyMapper.removeAll();
+        clear();
+        Set<T> data = dataProvider.fetch(new Query<>()).collect(Collectors.toCollection(LinkedHashSet::new));
+        setItems(modelToPresentation(this, data));
     }
 
     private void updateDataProviderListenerRegistration() {
         if (dataProviderListenerRegistration != null) {
             dataProviderListenerRegistration.remove();
         }
-        dataProviderListenerRegistration = dataProvider
-                .addDataProviderListener(e -> dataProviderUpdated());
-    }
-
-    private void dataProviderUpdated() {
-		runBeforeClientResponse((SerializableConsumer<UI>) ui -> {
-			List<T> data = dataProvider.fetch(new Query<>()).collect(Collectors.toList());
-			JsonArray items = convertToJsonArray(data.stream());
-			setItems(items);
-			Set<T> value = getValue();
-			setValue(value);
-		});
+        dataProviderListenerRegistration = dataProvider.addDataProviderListener(e -> reset());
     }
 
     private void runBeforeClientResponse(SerializableConsumer<UI> command) {
-        getElement().getNode().runWhenAttached(ui -> ui
-                .beforeClientResponse(this, context -> command.accept(ui)));
-    }
-
-    private JsonArray convertToJsonArray(Stream<T> data) {
-        JsonArray jsonArray = Json.createArray();
-        data.map(this::generateJson).forEachOrdered(
-                jsonObject -> jsonArray.set(jsonArray.length(), jsonObject));
-        return jsonArray;
-    }
-
-    private JsonObject generateJson(T item) {
-        JsonObject jsonObject = Json.createObject();
-        jsonObject.put("key", keyMapper.key(item));
-        dataGenerator.generateData(item, jsonObject);
-        return jsonObject;
+        getElement().getNode().runWhenAttached(
+            ui -> ui.beforeClientResponse(this, context -> command.accept(ui)));
     }
 
     private String generateLabel(T item) {
@@ -315,10 +278,47 @@ public class MultiselectComboBox<T>
         String label = getItemLabelGenerator().apply(item);
         if (label == null) {
             throw new IllegalStateException(String.format(
-                    "Got 'null' as a label value for the item '%s'. "
-                            + "'%s' instance may not return 'null' values",
-                    item, ItemLabelGenerator.class.getSimpleName()));
+                "Got 'null' as a label value for the item '%s'. "
+                        + "'%s' instance may not return 'null' values",
+                item, ItemLabelGenerator.class.getSimpleName()));
         }
         return label;
+    }
+
+    private static <T> Set<T> presentationToModel(MultiselectComboBox<T> multiselectComboBox, JsonArray presentation) {
+        JsonArray array = presentation;
+        Set<T> set = new HashSet<>();
+        for (int i = 0; i < array.length(); i++) {
+            String key = array.getObject(i).getString(KEY_ATTRIBUTE);
+            set.add(multiselectComboBox.keyMapper.get(key));
+        }
+        return set;
+    }
+
+    private static <T> JsonArray modelToPresentation(MultiselectComboBox<T> multiselectComboBox, Set<T> model) {
+        JsonArray array = Json.createArray();
+        if (model.isEmpty()) {
+            return array;
+        }
+
+        model.stream()
+            .map(multiselectComboBox::generateJson)
+            .forEach(jsonObject -> array.set(array.length(), jsonObject));
+
+        return array;
+    }
+
+    private JsonObject generateJson(T item) {
+        JsonObject jsonObject = Json.createObject();
+        jsonObject.put(KEY_ATTRIBUTE, keyMapper.key(item));
+        dataGenerator.generateData(item, jsonObject);
+        return jsonObject;
+    }
+
+    private Object getItemId(T item) {
+        if (getDataProvider() == null) {
+            return item;
+        }
+        return getDataProvider().getId(item);
     }
 }
