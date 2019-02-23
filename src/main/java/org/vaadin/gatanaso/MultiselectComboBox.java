@@ -7,14 +7,12 @@ import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.data.binder.HasDataProvider;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.KeyMapper;
 import com.vaadin.flow.data.provider.Query;
-import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.shared.Registration;
 import elemental.json.Json;
 import elemental.json.JsonArray;
@@ -264,11 +262,6 @@ public class MultiselectComboBox<T>
             dataProviderListenerRegistration.remove();
         }
         dataProviderListenerRegistration = dataProvider.addDataProviderListener(e -> reset());
-    }
-
-    private void runBeforeClientResponse(SerializableConsumer<UI> command) {
-        getElement().getNode().runWhenAttached(
-            ui -> ui.beforeClientResponse(this, context -> command.accept(ui)));
     }
 
     private String generateLabel(T item) {
