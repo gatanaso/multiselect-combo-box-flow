@@ -6,9 +6,9 @@ A multi select combo box component for Vaadin Flow.
 
 Integration of of the [multiselect-combo-box](https://github.com/gatanaso/multiselect-combo-box) web component.
 
-![multiselect-combo-box-flow](https://user-images.githubusercontent.com/15094658/52914278-1eed5480-32cf-11e9-9e6e-97f2f75e873b.gif)
+#### [Live Demo ↗](https://multiselect-combo-box-flow.herokuapp.com/)
 
-[web component demo ↗](https://multiselect-combo-box.firebaseapp.com/demo/)
+![multiselect-combo-box-flow](https://user-images.githubusercontent.com/15094658/52914278-1eed5480-32cf-11e9-9e6e-97f2f75e873b.gif)
 
 ## Install
 
