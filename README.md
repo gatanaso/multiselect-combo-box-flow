@@ -1,5 +1,6 @@
 [![Published on Vaadin  Directory](https://img.shields.io/badge/Vaadin%20Directory-published-00b4f0.svg)](https://vaadin.com/directory/component/multiselect-combo-box)
-
+[![Stars on vaadin.com/directory](https://img.shields.io/vaadin-directory/star/multiselect-combo-box.svg)](https://vaadin.com/directory/component/multiselect-combo-box)
+[![Version on Vaadin Directory](http://img.shields.io/vaadin-directory/version/multiselect-combo-box.svg)](https://vaadin.com/directory/component/multiselect-combo-box)
 # MultiselectComboBox
 
 A multi select combo box component for Vaadin Flow.
@@ -8,8 +9,6 @@ Integration of of the [multiselect-combo-box](https://github.com/gatanaso/multis
 
 #### [Live Demo ↗](https://multiselect-combo-box-flow.herokuapp.com/)
 
-![multiselect-combo-box-flow](https://user-images.githubusercontent.com/15094658/52914278-1eed5480-32cf-11e9-9e6e-97f2f75e873b.gif)
-
 ## Install
 
 Add the `multiselect-combo-box-flow dependency` to your `pom.xml` file:
@@ -17,7 +16,7 @@ Add the `multiselect-combo-box-flow dependency` to your `pom.xml` file:
 <dependency>
    <groupId>org.vaadin.gatanaso</groupId>
    <artifactId>multiselect-combo-box-flow</artifactId>
-   <version>0.0.1</version>
+   <version>0.0.2</version>
 </dependency>
 ```
 
@@ -99,9 +98,13 @@ This can be overridden by setting an item label generator:
 multiselectComboBox.setItemLabelGenerator(User::getEmail)
 ```
 
-## Running demos locally
+### Running demos locally
 
 1. Fork the `multiselect-combo-box-flow` repository and clone it locally.
 1. Build the project: `mvn clean install`
 1. Start the test/demo server: `mvn jetty:run`
 1. Navigate to http://localhost:8080 to view the demo.
+
+### Web Component
+The `<multiselect-combo-box>` web component is available on [webcomponents.org](https://www.webcomponents.org/element/multiselect-combo-box), 
+the [Vaadin Directory](https://vaadin.com/directory/component/gatanasomultiselect-combo-box) and [GitHub](https://github.com/gatanaso/multiselect-combo-box).
