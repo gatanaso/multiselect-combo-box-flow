@@ -1,7 +1,8 @@
 [![Published on Vaadin  Directory](https://img.shields.io/badge/Vaadin%20Directory-published-00b4f0.svg)](https://vaadin.com/directory/component/multiselect-combo-box)
-[![Stars on vaadin.com/directory](https://img.shields.io/vaadin-directory/star/multiselect-combo-box.svg)](https://vaadin.com/directory/component/multiselect-combo-box)
-[![Version on Vaadin Directory](http://img.shields.io/vaadin-directory/version/multiselect-combo-box.svg)](https://vaadin.com/directory/component/multiselect-combo-box)
 [![Build Status](https://travis-ci.org/gatanaso/multiselect-combo-box-flow.svg?branch=master)](https://travis-ci.org/gatanaso/multiselect-combo-box-flow)
+[![Version on Vaadin Directory](http://img.shields.io/vaadin-directory/version/multiselect-combo-box.svg)](https://vaadin.com/directory/component/multiselect-combo-box)
+[![Stars on vaadin.com/directory](https://img.shields.io/vaadin-directory/star/multiselect-combo-box.svg)](https://vaadin.com/directory/component/multiselect-combo-box)
+
 # MultiselectComboBox
 
 A multi select combo box component for Vaadin Flow.
@@ -17,7 +18,7 @@ Add the `multiselect-combo-box-flow dependency` to your `pom.xml` file:
 <dependency>
    <groupId>org.vaadin.gatanaso</groupId>
    <artifactId>multiselect-combo-box-flow</artifactId>
-   <version>0.0.2</version>
+   <version>0.0.3</version>
 </dependency>
 ```
 
@@ -51,6 +52,15 @@ Get the selected items/value:
 ```java
 // set of selected values, or an empty set if none selected
 Set<String> value = multiselectComboBox.getValue();
+```
+
+`MultiselectComboBox` also implements the [MultiSelect](https://vaadin.com/api/platform/12.0.3/com/vaadin/flow/data/selection/MultiSelect.html) interface, 
+which makes it easy to listen for selection changes: 
+```java
+multiselectComboBox.addSelectionListener(event -> {
+   event.getAddedSelection(); // get added items
+   event.getRemovedSelection() // get removed items
+});
 ```
 
 ## Object items
