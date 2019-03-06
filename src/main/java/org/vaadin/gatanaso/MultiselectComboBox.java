@@ -13,6 +13,9 @@ import com.vaadin.flow.data.provider.CompositeDataGenerator;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.KeyMapper;
 import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.data.selection.MultiSelect;
+import com.vaadin.flow.data.selection.MultiSelectionEvent;
+import com.vaadin.flow.data.selection.MultiSelectionListener;
 import com.vaadin.flow.shared.Registration;
 import elemental.json.Json;
 import elemental.json.JsonArray;
@@ -30,10 +33,10 @@ import java.util.stream.Collectors;
 public class MultiselectComboBox<T>
         extends AbstractSinglePropertyField<MultiselectComboBox<T>, Set<T>>
         implements HasStyle, HasSize, HasValidation,
-        HasDataProvider<T> {
+        MultiSelect<MultiselectComboBox<T>, T>, HasDataProvider<T> {
 
-    public static final String KEY_ATTRIBUTE = "key";
-    public static final String LABEL_ATTRIBUTE = "label";
+    public static final String ITEM_VALUE_PATH = "key";
+    public static final String ITEM_LABEL_PATH = "label";
 
     private ItemLabelGenerator<T> itemLabelGenerator = String::valueOf;
 
@@ -51,11 +54,11 @@ public class MultiselectComboBox<T>
             MultiselectComboBox::presentationToModel,
             MultiselectComboBox::modelToPresentation);
 
-        dataGenerator.addDataGenerator((item, jsonObject) -> jsonObject.put(LABEL_ATTRIBUTE, generateLabel(item)));
+        dataGenerator.addDataGenerator((item, jsonObject) -> jsonObject.put(ITEM_LABEL_PATH, generateLabel(item)));
 
-        setItemIdPath(KEY_ATTRIBUTE);
-        setItemValuePath(KEY_ATTRIBUTE);
-        setItemLabelPath(LABEL_ATTRIBUTE);
+        setItemIdPath(ITEM_VALUE_PATH);
+        setItemValuePath(ITEM_VALUE_PATH);
+        setItemLabelPath(ITEM_LABEL_PATH);
     }
 
     /**
@@ -64,7 +67,7 @@ public class MultiselectComboBox<T>
      * @return the label property of the multiselect-combo-box.
      */
     public String getLabel() {
-        return getElement().getProperty(LABEL_ATTRIBUTE);
+        return getElement().getProperty("label");
     }
 
     /**
@@ -74,7 +77,7 @@ public class MultiselectComboBox<T>
      *            the String value to set.
      */
     public void setLabel(String label) {
-        getElement().setProperty(LABEL_ATTRIBUTE, label == null ? "" : label);
+        getElement().setProperty("label", label == null ? "" : label);
     }
 
     /**
@@ -111,7 +114,7 @@ public class MultiselectComboBox<T>
      * @return true if the component is required, false otherwise.
      */
     public boolean isRequired() {
-        return getElement().getProperty("required", false);
+        return super.isRequiredIndicatorVisible();
     }
 
     /**
@@ -121,26 +124,7 @@ public class MultiselectComboBox<T>
      *            the boolean value to set
      */
     public void setRequired(boolean required) {
-        getElement().setProperty("required", required);
-    }
-
-    /**
-     * Gets the readonly value of the multiselect-combo-box.
-     *
-     * @return true if the component is readonly, false otherwise.
-     */
-    public boolean isReadonly() {
-        return getElement().getProperty("readonly", false);
-    }
-
-    /**
-     * Sets the readonly value of the {@code multiselect-combo-box}.
-     *
-     * @param readonly
-     *            the boolean value to set
-     */
-    public void setReadonly(boolean readonly) {
-        getElement().setProperty("readonly", readonly);
+        super.setRequiredIndicatorVisible(required);
     }
 
     /**
@@ -201,10 +185,6 @@ public class MultiselectComboBox<T>
 
     protected void setItems(JsonArray items) {
         getElement().setPropertyJson("items", items);
-    }
-
-    protected void setSelectedItems(JsonArray items) {
-        getElement().setPropertyJson("selectedItems", items);
     }
 
     /**
@@ -282,7 +262,7 @@ public class MultiselectComboBox<T>
         JsonArray array = presentation;
         Set<T> set = new HashSet<>();
         for (int i = 0; i < array.length(); i++) {
-            String key = array.getObject(i).getString(KEY_ATTRIBUTE);
+            String key = array.getObject(i).getString(ITEM_VALUE_PATH);
             set.add(multiselectComboBox.keyMapper.get(key));
         }
         return set;
@@ -303,7 +283,7 @@ public class MultiselectComboBox<T>
 
     private JsonObject generateJson(T item) {
         JsonObject jsonObject = Json.createObject();
-        jsonObject.put(KEY_ATTRIBUTE, keyMapper.key(item));
+        jsonObject.put(ITEM_VALUE_PATH, keyMapper.key(item));
         dataGenerator.generateData(item, jsonObject);
         return jsonObject;
     }
@@ -313,5 +293,25 @@ public class MultiselectComboBox<T>
             return item;
         }
         return getDataProvider().getId(item);
+    }
+
+    @Override
+    public void updateSelection(Set<T> addedItems, Set<T> removedItems) {
+        Set<T> value = new HashSet<>(getValue());
+        value.addAll(addedItems);
+        value.removeAll(removedItems);
+        setValue(value);
+    }
+
+    @Override
+    public Set<T> getSelectedItems() {
+        return getValue();
+    }
+
+    @Override
+    public Registration addSelectionListener(MultiSelectionListener<MultiselectComboBox<T>, T> listener) {
+        return addValueChangeListener(event -> listener.selectionChange(
+            new MultiSelectionEvent<>(this, this, event.getOldValue(), event.isFromClient())
+        ));
     }
 }
