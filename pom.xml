@@ -65,11 +65,17 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.webjars.bowergithub.gatanaso</groupId>
             <artifactId>multiselect-combo-box</artifactId>
             <version>0.0.5</version>
-        </dependency>        
-    </dependencies>
+        </dependency>
+	</dependencies>
 
     <build>
         <plugins>

@@ -36,7 +36,7 @@ public class DemoView extends VerticalLayout {
         multiselectComboBox.setLabel("Multiselect combo box with string items");
         multiselectComboBox.setPlaceholder("Add");
         multiselectComboBox.setItems("Item 1", "Item 2", "Item 3", "Item 4");
-        multiselectComboBox.addValueChangeListener(event -> multiselectComboBoxValueChangeHandler(multiselectComboBox));
+        multiselectComboBox.addSelectionListener(event -> Notification.show(event.toString()));
 
         Button getValueBtn = new Button("Get value");
         getValueBtn.addClickListener(event -> multiselectComboBoxValueChangeHandler(multiselectComboBox));
@@ -54,7 +54,7 @@ public class DemoView extends VerticalLayout {
             new User("Samantha Doe","samantha","samantha@demo.dev")
         );
         multiselectComboBox.setItems(data);
-        multiselectComboBox.addValueChangeListener(event -> objectMultiselectComboBoxValueChangeHandler(multiselectComboBox));
+        multiselectComboBox.addSelectionListener(event -> Notification.show(event.toString()));
 
         Button getValueBtn = new Button("Get value");
         getValueBtn.addClickListener(event -> objectMultiselectComboBoxValueChangeHandler(multiselectComboBox));
@@ -73,7 +73,7 @@ public class DemoView extends VerticalLayout {
         );
         multiselectComboBox.setItems(data);
         multiselectComboBox.setItemLabelGenerator(User::getEmail);
-        multiselectComboBox.addValueChangeListener(event -> objectMultiselectComboBoxValueChangeHandler(multiselectComboBox));
+        multiselectComboBox.addSelectionListener(event -> Notification.show(event.toString()));
 
         Button getValueBtn = new Button("Get value");
         getValueBtn.addClickListener(event -> objectMultiselectComboBoxValueChangeHandler(multiselectComboBox));
@@ -88,7 +88,7 @@ public class DemoView extends VerticalLayout {
         multiselectComboBox.setRequired(true);
         multiselectComboBox.setErrorMessage("The field is mandatory");
         multiselectComboBox.setItems("Item 1", "Item 2", "Item 3", "Item 4");
-        multiselectComboBox.addValueChangeListener(event -> multiselectComboBoxValueChangeHandler(multiselectComboBox));
+        multiselectComboBox.addSelectionListener(event -> Notification.show(event.toString()));
 
         Button getValueBtn = new Button("Get value");
         getValueBtn.addClickListener(event -> multiselectComboBoxValueChangeHandler(multiselectComboBox));
