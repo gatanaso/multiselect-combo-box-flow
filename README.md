@@ -1,6 +1,7 @@
 [![Published on Vaadin  Directory](https://img.shields.io/badge/Vaadin%20Directory-published-00b4f0.svg)](https://vaadin.com/directory/component/multiselect-combo-box)
 [![Stars on vaadin.com/directory](https://img.shields.io/vaadin-directory/star/multiselect-combo-box.svg)](https://vaadin.com/directory/component/multiselect-combo-box)
 [![Version on Vaadin Directory](http://img.shields.io/vaadin-directory/version/multiselect-combo-box.svg)](https://vaadin.com/directory/component/multiselect-combo-box)
+[![Build Status](https://travis-ci.org/gatanaso/multiselect-combo-box-flow.svg?branch=master)](https://travis-ci.org/gatanaso/multiselect-combo-box-flow)
 # MultiselectComboBox
 
 A multi select combo box component for Vaadin Flow.
