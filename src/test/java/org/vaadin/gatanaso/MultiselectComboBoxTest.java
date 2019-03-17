@@ -1,16 +1,22 @@
-package org.vaadin.gatanaso.tests;
+package org.vaadin.gatanaso;
 
+import com.vaadin.flow.data.provider.ConfigurableFilterDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.function.SerializablePredicate;
 import org.junit.Assert;
 import org.junit.Test;
-import org.vaadin.gatanaso.MultiselectComboBox;
 
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 
 /**
  * Tests for the {@link MultiselectComboBox}.
@@ -26,7 +32,7 @@ public class MultiselectComboBoxTest {
         multiselectComboBox = new MultiselectComboBox<>();
 
         // then
-        Assert.assertEquals(MultiselectComboBox.ITEM_LABEL_PATH, multiselectComboBox.getElement().getProperty("itemLabelPath"));
+        assertThat(multiselectComboBox.getElement().getProperty("itemLabelPath"), is(MultiselectComboBox.ITEM_LABEL_PATH));
     }
 
     @Test
@@ -38,7 +44,7 @@ public class MultiselectComboBoxTest {
         multiselectComboBox = new MultiselectComboBox<>();
 
         // then
-        Assert.assertEquals(MultiselectComboBox.ITEM_VALUE_PATH, multiselectComboBox.getElement().getProperty("itemValuePath"));
+        assertThat(multiselectComboBox.getElement().getProperty("itemValuePath"), is(MultiselectComboBox.ITEM_VALUE_PATH));
     }
 
     @Test
@@ -50,7 +56,7 @@ public class MultiselectComboBoxTest {
         multiselectComboBox = new MultiselectComboBox<>();
 
         // then
-        Assert.assertEquals(MultiselectComboBox.ITEM_VALUE_PATH, multiselectComboBox.getElement().getProperty("itemIdPath"));
+        assertThat(multiselectComboBox.getElement().getProperty("itemIdPath"), is(MultiselectComboBox.ITEM_VALUE_PATH));
     }
 
     @Test
@@ -63,7 +69,7 @@ public class MultiselectComboBoxTest {
         multiselectComboBox.setLabel(label);
 
         // then
-        Assert.assertEquals(multiselectComboBox.getLabel(), label);
+        assertThat(multiselectComboBox.getLabel(), is(label));
     }
 
     @Test
@@ -76,7 +82,7 @@ public class MultiselectComboBoxTest {
         multiselectComboBox.setPlaceholder(placeholder);
 
         // then
-        Assert.assertEquals(multiselectComboBox.getPlaceholder(), placeholder);
+        assertThat(multiselectComboBox.getPlaceholder(), is(placeholder));
     }
 
     @Test
@@ -90,8 +96,8 @@ public class MultiselectComboBoxTest {
         multiselectComboBox.setRequired(true);
 
         // then
-        Assert.assertTrue(multiselectComboBox.isRequired());
-        Assert.assertEquals(Boolean.TRUE.toString(), multiselectComboBox.getElement().getProperty("required"));
+        assertThat(multiselectComboBox.isRequired(), is(true));
+        assertThat(multiselectComboBox.getElement().getProperty("required"), is("true"));
     }
 
     @Test
@@ -105,8 +111,8 @@ public class MultiselectComboBoxTest {
         multiselectComboBox.setReadOnly(true);
 
         // then
-        Assert.assertTrue(multiselectComboBox.isReadOnly());
-        Assert.assertEquals(Boolean.TRUE.toString(), multiselectComboBox.getElement().getProperty("readonly"));
+        assertThat(multiselectComboBox.isReadOnly(), is(true));
+        assertThat(multiselectComboBox.getElement().getProperty("readonly"), is("true"));
     }
 
     @Test
@@ -120,8 +126,8 @@ public class MultiselectComboBoxTest {
         multiselectComboBox.setInvalid(true);
 
         // then
-        Assert.assertTrue(multiselectComboBox.isInvalid());
-        Assert.assertEquals(Boolean.TRUE.toString(), multiselectComboBox.getElement().getProperty("invalid"));
+        assertThat(multiselectComboBox.isInvalid(), is(true));
+        assertThat(multiselectComboBox.getElement().getProperty("invalid"), is("true"));
     }
 
     @Test
@@ -134,7 +140,7 @@ public class MultiselectComboBoxTest {
         multiselectComboBox.setErrorMessage(message);
 
         // then
-        Assert.assertEquals(multiselectComboBox.getErrorMessage(), message);
+        assertThat(multiselectComboBox.getErrorMessage(), is(message));
     }
 
     @Test
@@ -146,10 +152,10 @@ public class MultiselectComboBoxTest {
         multiselectComboBox.setItems(Arrays.asList("item 1", "item 2", "item 3"));
 
         // then
-        Assert.assertEquals(3, multiselectComboBox.items.size());
-        Assert.assertEquals(multiselectComboBox.items.get(0), "item 1");
-        Assert.assertEquals(multiselectComboBox.items.get(1), "item 2");
-        Assert.assertEquals(multiselectComboBox.items.get(2), "item 3");
+        assertThat(multiselectComboBox.items, hasSize(3));
+        assertThat(multiselectComboBox.items, hasItem("item 1"));
+        assertThat(multiselectComboBox.items, hasItem("item 2"));
+        assertThat(multiselectComboBox.items, hasItem("item 3"));
     }
 
     private static class TestMultiselectComboBox extends MultiselectComboBox<String> {
@@ -169,15 +175,39 @@ public class MultiselectComboBoxTest {
         MultiselectComboBox<Object> multiselectComboBox = new MultiselectComboBox<>();
         multiselectComboBox.setItems(Arrays.asList("item 1", "item 2")); // data provider is set
 
-        // when
-        Set<Object> value = Arrays.asList("item 1").stream().collect(Collectors.toCollection(LinkedHashSet::new));
-        multiselectComboBox.setValue(value);
+        Set<Object> value = new LinkedHashSet<>(Arrays.asList("item 1"));
 
-        Assert.assertEquals("item 1", multiselectComboBox.getValue().toArray()[0]); // ensure value is set
+        // when
+        multiselectComboBox.setValue(value);
+        assertThat(multiselectComboBox.getValue(), hasItem("item 1"));  // ensure value is set
 
         multiselectComboBox.setItems(Arrays.asList("foo", "bar")); // update data provider
 
         // then
-        Assert.assertEquals(0, multiselectComboBox.getValue().size()); // value is reset to empty
+        assertThat(multiselectComboBox.getValue(), hasSize(0)); // value is reset to empty
+    }
+
+
+    @Test
+    public void shouldApplyDataProviderFilterAndNotResetTheValue() {
+        // given
+        ConfigurableFilterDataProvider<String, Void, SerializablePredicate<String>> dataProvider
+            = DataProvider.ofItems("Java", "Python", "Ruby", "Go").withConfigurableFilter();
+
+        MultiselectComboBox<String> multiselectComboBox = new MultiselectComboBox<>();
+        multiselectComboBox.setDataProvider(dataProvider);
+
+        multiselectComboBox.setValue(new LinkedHashSet<>(Arrays.asList("Python", "Go")));
+
+        assertThat(multiselectComboBox.getValue(), hasItem("Python")); // ensure value is set
+        assertThat(multiselectComboBox.getValue(), hasItem("Go"));
+
+        // when
+        dataProvider.setFilter(d -> !d.equals("Java"));
+
+        // then
+        assertThat(multiselectComboBox.getValue(), hasSize(2));
+        assertThat(multiselectComboBox.getValue(), hasItem("Python"));
+        assertThat(multiselectComboBox.getValue(), hasItem("Go"));
     }
 }

@@ -28,6 +28,16 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * A multiselection component where items are displayed in a drop-down list.
+ *
+ * <p>
+ *     This is the server-side component for the `multiselect-combo-box` webcomponent. It contains the same features as the webcomponent,
+ *     such as displaying, selection and filtering of multiple items from a drop-down list.
+ * </p>
+ *
+ * @author gatanaso
+ */
 @Tag("multiselect-combo-box")
 @HtmlImport("bower_components/multiselect-combo-box/multiselect-combo-box.html")
 public class MultiselectComboBox<T>
@@ -35,8 +45,9 @@ public class MultiselectComboBox<T>
         implements HasStyle, HasSize, HasValidation,
         MultiSelect<MultiselectComboBox<T>, T>, HasDataProvider<T> {
 
-    public static final String ITEM_VALUE_PATH = "key";
-    public static final String ITEM_LABEL_PATH = "label";
+
+    protected static final String ITEM_VALUE_PATH = "key";
+    protected static final String ITEM_LABEL_PATH = "label";
 
     private ItemLabelGenerator<T> itemLabelGenerator = String::valueOf;
 
@@ -45,8 +56,15 @@ public class MultiselectComboBox<T>
     private final KeyMapper<T> keyMapper = new KeyMapper<>(this::getItemId);
 
     private final CompositeDataGenerator<T> dataGenerator = new CompositeDataGenerator<>();
+
     private Registration dataProviderListenerRegistration;
 
+    /**
+     * Default constructor.
+     * <p>
+     *     Creates an empty multiselect combo box.
+     * </p>
+     */
     public MultiselectComboBox() {
         super("selectedItems",
             Collections.emptySet(),
@@ -214,7 +232,7 @@ public class MultiselectComboBox<T>
     }
 
     /**
-     * Gets the data provider.
+     * Gets the data provider used by this {@link MultiselectComboBox}.
      *
      * @return the data provider, not {@code null}
      */
@@ -233,6 +251,10 @@ public class MultiselectComboBox<T>
     private void reset() {
         keyMapper.removeAll();
         clear();
+        refreshItems();
+    }
+
+    private void refreshItems() {
         Set<T> data = dataProvider.fetch(new Query<>()).collect(Collectors.toCollection(LinkedHashSet::new));
         setItems(modelToPresentation(this, data));
     }
@@ -241,7 +263,7 @@ public class MultiselectComboBox<T>
         if (dataProviderListenerRegistration != null) {
             dataProviderListenerRegistration.remove();
         }
-        dataProviderListenerRegistration = dataProvider.addDataProviderListener(e -> reset());
+        dataProviderListenerRegistration = dataProvider.addDataProviderListener(e -> refreshItems());
     }
 
     private String generateLabel(T item) {
