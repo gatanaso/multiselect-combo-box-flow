@@ -1,10 +1,11 @@
-package org.vaadin.gatanaso;
+package org.vaadin.gatanaso.demo;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
+import org.vaadin.gatanaso.MultiselectComboBox;
 
 import java.util.Arrays;
 import java.util.List;
