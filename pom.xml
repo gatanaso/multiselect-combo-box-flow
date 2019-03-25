@@ -3,7 +3,7 @@
 
     <groupId>org.vaadin.gatanaso</groupId>
     <artifactId>multiselect-combo-box-flow</artifactId>
-    <version>0.0.5</version>
+    <version>0.0.6</version>
     <name>Multiselect Combo Box</name>
     <description>Integration of multiselect-combo-box for Vaadin platform</description>
 
@@ -62,7 +62,13 @@
         <dependency>
             <groupId>org.webjars.bowergithub.gatanaso</groupId>
             <artifactId>multiselect-combo-box</artifactId>
-            <version>0.0.8</version>
+            <version>0.0.9</version>
+        </dependency>
+        <!-- override vaadin-bom defined version -->
+        <dependency>
+            <groupId>org.webjars.bowergithub.vaadin</groupId>
+            <artifactId>vaadin-combo-box</artifactId>
+            <version>4.2.7</version>
         </dependency>
         <!-- test dependencies -->
         <dependency>
