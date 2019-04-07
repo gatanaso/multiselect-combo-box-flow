@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
  * @author gatanaso
  */
 @Tag("multiselect-combo-box")
-@HtmlImport("bower_components/multiselect-combo-box/multiselect-combo-box.html")
+@HtmlImport("bower_components/multiselect-combo-box/src/multiselect-combo-box.html")
 public class MultiselectComboBox<T>
         extends AbstractSinglePropertyField<MultiselectComboBox<T>, Set<T>>
         implements HasStyle, HasSize, HasValidation,
