@@ -1,6 +1,7 @@
 package org.vaadin.gatanaso;
 
 import com.vaadin.flow.component.AbstractSinglePropertyField;
+import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.HasValidation;
@@ -42,7 +43,7 @@ import java.util.stream.Collectors;
 @HtmlImport("bower_components/multiselect-combo-box/src/multiselect-combo-box.html")
 public class MultiselectComboBox<T>
         extends AbstractSinglePropertyField<MultiselectComboBox<T>, Set<T>>
-        implements HasStyle, HasSize, HasValidation,
+        implements HasStyle, HasSize, HasValidation, HasEnabled,
         MultiSelect<MultiselectComboBox<T>, T>, HasDataProvider<T> {
 
 
