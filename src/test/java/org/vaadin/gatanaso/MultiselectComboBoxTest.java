@@ -116,6 +116,21 @@ public class MultiselectComboBoxTest {
     }
 
     @Test
+    public void shouldSetCompactMode() {
+        // given
+        MultiselectComboBox<String> multiselectComboBox = new MultiselectComboBox<>();
+
+        Assert.assertFalse(multiselectComboBox.isCompactMode());
+
+        // when
+        multiselectComboBox.setCompactMode(true);
+
+        // then
+        assertThat(multiselectComboBox.isCompactMode(), is(true));
+        assertThat(multiselectComboBox.getElement().getProperty("compactMode"), is("true"));
+    }
+
+    @Test
     public void shouldSetInvalid() {
         // given
         MultiselectComboBox<String> multiselectComboBox = new MultiselectComboBox<>();

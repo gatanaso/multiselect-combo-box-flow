@@ -24,6 +24,7 @@ public class DemoView extends VerticalLayout {
         addObjectDemo();
         addObjectDemoWithLabelGenerator();
         addRequiredDemo();
+        addCompactModeDemo();
     }
 
     private void addTitle() {
@@ -90,6 +91,21 @@ public class DemoView extends VerticalLayout {
         multiselectComboBox.setErrorMessage("The field is mandatory");
         multiselectComboBox.setItems("Item 1", "Item 2", "Item 3", "Item 4");
         multiselectComboBox.addSelectionListener(event -> Notification.show(event.toString()));
+
+        Button getValueBtn = new Button("Get value");
+        getValueBtn.addClickListener(event -> multiselectComboBoxValueChangeHandler(multiselectComboBox));
+
+        add(buildDemoContainer(multiselectComboBox, getValueBtn));
+    }
+
+    private void addCompactModeDemo() {
+        MultiselectComboBox<String> multiselectComboBox = new MultiselectComboBox();
+        multiselectComboBox.setLabel("Multiselect combo box in compact mode");
+        multiselectComboBox.setPlaceholder("Add");
+        multiselectComboBox.setItems("Item 1", "Item 2", "Item 3", "Item 4");
+        multiselectComboBox.addSelectionListener(event -> Notification.show(event.toString()));
+
+        multiselectComboBox.setCompactMode(true);
 
         Button getValueBtn = new Button("Get value");
         getValueBtn.addClickListener(event -> multiselectComboBoxValueChangeHandler(multiselectComboBox));
