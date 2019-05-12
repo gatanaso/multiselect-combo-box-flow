@@ -147,6 +147,25 @@ public class MultiselectComboBox<T>
     }
 
     /**
+     * Gets the 'compact-mode' property value of the multiselect-combo-box.
+     *
+     * @return true if the component is in 'compact-mode', false otherwise.
+     */
+    public boolean isCompactMode() {
+        return getElement().getProperty("compactMode", false);
+    }
+
+    /**
+     * Sets the 'compact-mode' property value of the multiselect-combo-box.
+     *
+     * @param compactMode
+     *            the boolean value to set
+     */
+    public void setCompactMode(boolean compactMode) {
+        getElement().setProperty("compactMode", compactMode);
+    }
+
+    /**
      * Gets the validity of the multiselect-combo-box.
      *
      * @return true if the component is invalid, false otherwise.
