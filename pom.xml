@@ -3,7 +3,7 @@
 
     <groupId>org.vaadin.gatanaso</groupId>
     <artifactId>multiselect-combo-box-flow</artifactId>
-    <version>0.1.0</version>
+    <version>1.0.0</version>
     <name>Multiselect Combo Box</name>
     <description>Integration of multiselect-combo-box for Vaadin platform</description>
 
