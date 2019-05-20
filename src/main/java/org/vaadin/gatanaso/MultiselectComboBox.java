@@ -166,6 +166,27 @@ public class MultiselectComboBox<T>
     }
 
     /**
+     * Gets the 'ordered' property value of the multiselect-combo-box.
+     *
+     * @return true if the component is ordered, false otherwise.
+     */
+    public boolean isOrdered() {
+        return getElement().getProperty("ordered", false);
+    }
+
+    /**
+     * Sets the 'ordered' property value of the multiselect-combo-box.
+     *
+     * This attribute specifies if the list of selected items should be kept ordered in ascending lexical order.
+     *
+     * @param ordered
+     *            the boolean value to set
+     */
+    public void setOrdered(boolean ordered) {
+        getElement().setProperty("ordered", ordered);
+    }
+
+    /**
      * Gets the validity of the multiselect-combo-box.
      *
      * @return true if the component is invalid, false otherwise.
