@@ -131,6 +131,21 @@ public class MultiselectComboBoxTest {
     }
 
     @Test
+    public void shouldSetOrdered() {
+        // given
+        MultiselectComboBox<String> multiselectComboBox = new MultiselectComboBox<>();
+
+        Assert.assertFalse(multiselectComboBox.isOrdered());
+
+        // when
+        multiselectComboBox.setOrdered(true);
+
+        // then
+        assertThat(multiselectComboBox.isOrdered(), is(true));
+        assertThat(multiselectComboBox.getElement().getProperty("ordered"), is("true"));
+    }
+
+    @Test
     public void shouldSetInvalid() {
         // given
         MultiselectComboBox<String> multiselectComboBox = new MultiselectComboBox<>();
