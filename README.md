@@ -18,7 +18,7 @@ Add the `multiselect-combo-box-flow dependency` to your `pom.xml` file:
 <dependency>
    <groupId>org.vaadin.gatanaso</groupId>
    <artifactId>multiselect-combo-box-flow</artifactId>
-   <version>1.0.1</version>
+   <version>2.0.0.rc1</version>
 </dependency>
 ```
 
@@ -108,6 +108,9 @@ This can be overridden by setting an item label generator:
 // use the user email as an item label
 multiselectComboBox.setItemLabelGenerator(User::getEmail)
 ```
+### Branch information
+* `master` the version for Vaadin 12 and Vaadin 13
+* `v14` the version for Vaadin 14
 
 ### Running demos locally
 
