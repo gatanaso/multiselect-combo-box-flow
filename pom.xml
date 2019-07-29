@@ -3,12 +3,12 @@
 
     <groupId>org.vaadin.gatanaso</groupId>
     <artifactId>multiselect-combo-box-flow</artifactId>
-    <version>2.0.0.rc1</version>
+    <version>2.0.0.rc2</version>
     <name>Multiselect Combo Box</name>
     <description>Integration of multiselect-combo-box for Vaadin platform</description>
 
     <properties>
-        <vaadin.version>14.0.0.rc4</vaadin.version>
+        <vaadin.version>14.0.0.rc7</vaadin.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -63,12 +63,6 @@
             <groupId>org.webjars.bowergithub.gatanaso</groupId>
             <artifactId>multiselect-combo-box</artifactId>
             <version>1.0.1</version>
-        </dependency>
-        <!-- override vaadin-bom defined version -->
-        <dependency>
-            <groupId>org.webjars.bowergithub.vaadin</groupId>
-            <artifactId>vaadin-combo-box</artifactId>
-            <version>4.2.7</version>
         </dependency>
         <!-- test dependencies -->
         <dependency>

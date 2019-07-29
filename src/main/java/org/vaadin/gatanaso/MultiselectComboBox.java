@@ -43,7 +43,7 @@ import java.util.stream.Collectors;
  */
 @Tag("multiselect-combo-box")
 @HtmlImport("bower_components/multiselect-combo-box/src/multiselect-combo-box.html")
-@NpmPackage(value = "multiselect-combo-box", version = "2.0.1")
+@NpmPackage(value = "multiselect-combo-box", version = "2.0.2")
 @JsModule("multiselect-combo-box/src/multiselect-combo-box.js")
 public class MultiselectComboBox<T>
         extends AbstractSinglePropertyField<MultiselectComboBox<T>, Set<T>>
