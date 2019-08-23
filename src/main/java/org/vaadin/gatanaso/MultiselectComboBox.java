@@ -1,5 +1,12 @@
 package org.vaadin.gatanaso;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasSize;
@@ -8,7 +15,6 @@ import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.data.binder.HasDataProvider;
@@ -20,16 +26,10 @@ import com.vaadin.flow.data.selection.MultiSelect;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
 import com.vaadin.flow.data.selection.MultiSelectionListener;
 import com.vaadin.flow.shared.Registration;
+
 import elemental.json.Json;
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
-
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * A multiselection component where items are displayed in a drop-down list.
@@ -42,7 +42,6 @@ import java.util.stream.Collectors;
  * @author gatanaso
  */
 @Tag("multiselect-combo-box")
-@HtmlImport("bower_components/multiselect-combo-box/src/multiselect-combo-box.html")
 @NpmPackage(value = "multiselect-combo-box", version = "2.0.2")
 @JsModule("multiselect-combo-box/src/multiselect-combo-box.js")
 public class MultiselectComboBox<T>

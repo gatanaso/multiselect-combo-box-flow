@@ -1,8 +1,17 @@
-/target/
-/bin/
-.idea/
-.classpath
+# Maven files
+target/
+
+# Eclipse files
 .project
 .settings
-**/resources/webjars/
-**/maven
+.classpath
+
+# IntelliJ IDEA files
+.idea/
+*.iml
+
+# generated/updated by the flow-maven-plugin
+node_modules
+package*.json
+webpack.config.js
+webpack.generated.js
