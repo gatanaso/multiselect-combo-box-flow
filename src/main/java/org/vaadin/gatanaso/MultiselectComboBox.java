@@ -35,8 +35,9 @@ import elemental.json.JsonObject;
  * A multiselection component where items are displayed in a drop-down list.
  *
  * <p>
- *     This is the server-side component for the `multiselect-combo-box` webcomponent. It contains the same features as the webcomponent,
- *     such as displaying, selection and filtering of multiple items from a drop-down list.
+ * This is the server-side component for the `multiselect-combo-box`
+ * webcomponent. It contains the same features as the webcomponent, such as
+ * displaying, selection and filtering of multiple items from a drop-down list.
  * </p>
  *
  * @author gatanaso
@@ -49,38 +50,56 @@ public class MultiselectComboBox<T>
         implements HasStyle, HasSize, HasValidation, HasEnabled,
         MultiSelect<MultiselectComboBox<T>, T>, HasDataProvider<T> {
 
-
     protected static final String ITEM_VALUE_PATH = "key";
     protected static final String ITEM_LABEL_PATH = "label";
-
-    private ItemLabelGenerator<T> itemLabelGenerator = String::valueOf;
-
-    private DataProvider<T, ?> dataProvider = DataProvider.ofItems();
-
-    private final KeyMapper<T> keyMapper = new KeyMapper<>(this::getItemId);
-
     private final CompositeDataGenerator<T> dataGenerator = new CompositeDataGenerator<>();
-
+    private ItemLabelGenerator<T> itemLabelGenerator = String::valueOf;
+    private DataProvider<T, ?> dataProvider = DataProvider.ofItems();
+    private final KeyMapper<T> keyMapper = new KeyMapper<>(this::getItemId);
     private Registration dataProviderListenerRegistration;
 
     /**
      * Default constructor.
      * <p>
-     *     Creates an empty multiselect combo box.
+     * Creates an empty multiselect combo box.
      * </p>
      */
     public MultiselectComboBox() {
-        super("selectedItems",
-            Collections.emptySet(),
-            JsonArray.class,
-            MultiselectComboBox::presentationToModel,
-            MultiselectComboBox::modelToPresentation);
+        super("selectedItems", Collections.emptySet(), JsonArray.class,
+                MultiselectComboBox::presentationToModel,
+                MultiselectComboBox::modelToPresentation);
 
-        dataGenerator.addDataGenerator((item, jsonObject) -> jsonObject.put(ITEM_LABEL_PATH, generateLabel(item)));
+        dataGenerator.addDataGenerator((item, jsonObject) -> jsonObject
+                .put(ITEM_LABEL_PATH, generateLabel(item)));
 
         setItemIdPath(ITEM_VALUE_PATH);
         setItemValuePath(ITEM_VALUE_PATH);
         setItemLabelPath(ITEM_LABEL_PATH);
+    }
+
+    private static <T> Set<T> presentationToModel(
+            MultiselectComboBox<T> multiselectComboBox,
+            JsonArray presentation) {
+        JsonArray array = presentation;
+        Set<T> set = new HashSet<>();
+        for (int i = 0; i < array.length(); i++) {
+            String key = array.getObject(i).getString(ITEM_VALUE_PATH);
+            set.add(multiselectComboBox.keyMapper.get(key));
+        }
+        return set;
+    }
+
+    private static <T> JsonArray modelToPresentation(
+            MultiselectComboBox<T> multiselectComboBox, Set<T> model) {
+        JsonArray array = Json.createArray();
+        if (model.isEmpty()) {
+            return array;
+        }
+
+        model.stream().map(multiselectComboBox::generateJson)
+                .forEach(jsonObject -> array.set(array.length(), jsonObject));
+
+        return array;
     }
 
     /**
@@ -127,7 +146,8 @@ public class MultiselectComboBox<T>
      *            the String value to set.
      */
     public void setPlaceholder(String placeholder) {
-        getElement().setProperty("placeholder", placeholder == null ? "" : placeholder);
+        getElement().setProperty("placeholder",
+                placeholder == null ? "" : placeholder);
     }
 
     /**
@@ -180,7 +200,8 @@ public class MultiselectComboBox<T>
     /**
      * Sets the 'ordered' property value of the multiselect-combo-box.
      *
-     * This attribute specifies if the list of selected items should be kept ordered in ascending lexical order.
+     * This attribute specifies if the list of selected items should be kept
+     * ordered in ascending lexical order.
      *
      * @param ordered
      *            the boolean value to set
@@ -230,19 +251,23 @@ public class MultiselectComboBox<T>
      */
     @Override
     public void setErrorMessage(String errorMessage) {
-        getElement().setProperty("errorMessage", errorMessage == null ? "" : errorMessage);
+        getElement().setProperty("errorMessage",
+                errorMessage == null ? "" : errorMessage);
     }
 
     private void setItemValuePath(String itemValuePath) {
-        getElement().setProperty("itemValuePath", itemValuePath == null ? "" : itemValuePath);
+        getElement().setProperty("itemValuePath",
+                itemValuePath == null ? "" : itemValuePath);
     }
 
     private void setItemLabelPath(String itemLabelPath) {
-        getElement().setProperty("itemLabelPath", itemLabelPath == null ? "" : itemLabelPath);
+        getElement().setProperty("itemLabelPath",
+                itemLabelPath == null ? "" : itemLabelPath);
     }
 
     private void setItemIdPath(String itemIdPath) {
-        getElement().setProperty("itemIdPath", itemIdPath == null ? "" : itemIdPath);
+        getElement().setProperty("itemIdPath",
+                itemIdPath == null ? "" : itemIdPath);
     }
 
     protected void setItems(JsonArray items) {
@@ -270,7 +295,8 @@ public class MultiselectComboBox<T>
      */
     public void setItemLabelGenerator(
             ItemLabelGenerator<T> itemLabelGenerator) {
-        Objects.requireNonNull(itemLabelGenerator, "The item label generator can not be null");
+        Objects.requireNonNull(itemLabelGenerator,
+                "The item label generator can not be null");
         this.itemLabelGenerator = itemLabelGenerator;
         reset();
     }
@@ -286,7 +312,8 @@ public class MultiselectComboBox<T>
 
     @Override
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
-        Objects.requireNonNull(dataProvider, "The data provider can not be null");
+        Objects.requireNonNull(dataProvider,
+                "The data provider can not be null");
         this.dataProvider = dataProvider;
         reset();
         updateDataProviderListenerRegistration();
@@ -299,7 +326,8 @@ public class MultiselectComboBox<T>
     }
 
     private void refreshItems() {
-        Set<T> data = dataProvider.fetch(new Query<>()).collect(Collectors.toCollection(LinkedHashSet::new));
+        Set<T> data = dataProvider.fetch(new Query<>())
+                .collect(Collectors.toCollection(LinkedHashSet::new));
         setItems(modelToPresentation(this, data));
     }
 
@@ -307,7 +335,8 @@ public class MultiselectComboBox<T>
         if (dataProviderListenerRegistration != null) {
             dataProviderListenerRegistration.remove();
         }
-        dataProviderListenerRegistration = dataProvider.addDataProviderListener(e -> refreshItems());
+        dataProviderListenerRegistration = dataProvider
+                .addDataProviderListener(e -> refreshItems());
     }
 
     private String generateLabel(T item) {
@@ -317,34 +346,11 @@ public class MultiselectComboBox<T>
         String label = getItemLabelGenerator().apply(item);
         if (label == null) {
             throw new IllegalStateException(String.format(
-                "Got 'null' as a label value for the item '%s'. "
-                        + "'%s' instance may not return 'null' values",
-                item, ItemLabelGenerator.class.getSimpleName()));
+                    "Got 'null' as a label value for the item '%s'. "
+                            + "'%s' instance may not return 'null' values",
+                    item, ItemLabelGenerator.class.getSimpleName()));
         }
         return label;
-    }
-
-    private static <T> Set<T> presentationToModel(MultiselectComboBox<T> multiselectComboBox, JsonArray presentation) {
-        JsonArray array = presentation;
-        Set<T> set = new HashSet<>();
-        for (int i = 0; i < array.length(); i++) {
-            String key = array.getObject(i).getString(ITEM_VALUE_PATH);
-            set.add(multiselectComboBox.keyMapper.get(key));
-        }
-        return set;
-    }
-
-    private static <T> JsonArray modelToPresentation(MultiselectComboBox<T> multiselectComboBox, Set<T> model) {
-        JsonArray array = Json.createArray();
-        if (model.isEmpty()) {
-            return array;
-        }
-
-        model.stream()
-            .map(multiselectComboBox::generateJson)
-            .forEach(jsonObject -> array.set(array.length(), jsonObject));
-
-        return array;
     }
 
     private JsonObject generateJson(T item) {
@@ -375,9 +381,10 @@ public class MultiselectComboBox<T>
     }
 
     @Override
-    public Registration addSelectionListener(MultiSelectionListener<MultiselectComboBox<T>, T> listener) {
-        return addValueChangeListener(event -> listener.selectionChange(
-            new MultiSelectionEvent<>(this, this, event.getOldValue(), event.isFromClient())
-        ));
+    public Registration addSelectionListener(
+            MultiSelectionListener<MultiselectComboBox<T>, T> listener) {
+        return addValueChangeListener(event -> listener
+                .selectionChange(new MultiSelectionEvent<>(this, this,
+                        event.getOldValue(), event.isFromClient())));
     }
 }

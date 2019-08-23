@@ -40,10 +40,13 @@ public class DemoView extends VerticalLayout {
         multiselectComboBox.setLabel("Multiselect combo box with string items");
         multiselectComboBox.setPlaceholder("Add");
         multiselectComboBox.setItems("Item 1", "Item 2", "Item 3", "Item 4");
-        multiselectComboBox.addSelectionListener(event -> Notification.show(event.toString()));
+        multiselectComboBox.addSelectionListener(
+                event -> Notification.show(event.toString()));
 
         Button getValueBtn = new Button("Get value");
-        getValueBtn.addClickListener(event -> multiselectComboBoxValueChangeHandler(multiselectComboBox));
+        getValueBtn.addClickListener(
+                event -> multiselectComboBoxValueChangeHandler(
+                        multiselectComboBox));
 
         add(buildDemoContainer(multiselectComboBox, getValueBtn));
     }
@@ -53,34 +56,39 @@ public class DemoView extends VerticalLayout {
         multiselectComboBox.setLabel("Multiselect combo box with object items");
         multiselectComboBox.setPlaceholder("Add");
         List<User> data = Arrays.asList(
-            new User("Leanne Graham","leanne","leanne@demo.dev"),
-            new User("Ervin Howell","ervin","ervin@demo.dev"),
-            new User("Samantha Doe","samantha","samantha@demo.dev")
-        );
+                new User("Leanne Graham", "leanne", "leanne@demo.dev"),
+                new User("Ervin Howell", "ervin", "ervin@demo.dev"),
+                new User("Samantha Doe", "samantha", "samantha@demo.dev"));
         multiselectComboBox.setItems(data);
-        multiselectComboBox.addSelectionListener(event -> Notification.show(event.toString()));
+        multiselectComboBox.addSelectionListener(
+                event -> Notification.show(event.toString()));
 
         Button getValueBtn = new Button("Get value");
-        getValueBtn.addClickListener(event -> objectMultiselectComboBoxValueChangeHandler(multiselectComboBox));
+        getValueBtn.addClickListener(
+                event -> objectMultiselectComboBoxValueChangeHandler(
+                        multiselectComboBox));
 
         add(buildDemoContainer(multiselectComboBox, getValueBtn));
     }
 
     private void addObjectDemoWithLabelGenerator() {
         MultiselectComboBox<User> multiselectComboBox = new MultiselectComboBox();
-        multiselectComboBox.setLabel("Multiselect combo box with object items and custom item label generator");
+        multiselectComboBox.setLabel(
+                "Multiselect combo box with object items and custom item label generator");
         multiselectComboBox.setPlaceholder("Add");
         List<User> data = Arrays.asList(
-            new User("Leanne Graham","leanne","leanne@demo.dev"),
-            new User("Ervin Howell","ervin","ervin@demo.dev"),
-            new User("Samantha Doe","samantha","samantha@demo.dev")
-        );
+                new User("Leanne Graham", "leanne", "leanne@demo.dev"),
+                new User("Ervin Howell", "ervin", "ervin@demo.dev"),
+                new User("Samantha Doe", "samantha", "samantha@demo.dev"));
         multiselectComboBox.setItems(data);
         multiselectComboBox.setItemLabelGenerator(User::getEmail);
-        multiselectComboBox.addSelectionListener(event -> Notification.show(event.toString()));
+        multiselectComboBox.addSelectionListener(
+                event -> Notification.show(event.toString()));
 
         Button getValueBtn = new Button("Get value");
-        getValueBtn.addClickListener(event -> objectMultiselectComboBoxValueChangeHandler(multiselectComboBox));
+        getValueBtn.addClickListener(
+                event -> objectMultiselectComboBoxValueChangeHandler(
+                        multiselectComboBox));
 
         add(buildDemoContainer(multiselectComboBox, getValueBtn));
     }
@@ -92,10 +100,13 @@ public class DemoView extends VerticalLayout {
         multiselectComboBox.setRequired(true);
         multiselectComboBox.setErrorMessage("The field is mandatory");
         multiselectComboBox.setItems("Item 1", "Item 2", "Item 3", "Item 4");
-        multiselectComboBox.addSelectionListener(event -> Notification.show(event.toString()));
+        multiselectComboBox.addSelectionListener(
+                event -> Notification.show(event.toString()));
 
         Button getValueBtn = new Button("Get value");
-        getValueBtn.addClickListener(event -> multiselectComboBoxValueChangeHandler(multiselectComboBox));
+        getValueBtn.addClickListener(
+                event -> multiselectComboBoxValueChangeHandler(
+                        multiselectComboBox));
 
         add(buildDemoContainer(multiselectComboBox, getValueBtn));
     }
@@ -105,46 +116,55 @@ public class DemoView extends VerticalLayout {
         multiselectComboBox.setLabel("Multiselect combo box in compact mode");
         multiselectComboBox.setPlaceholder("Add");
         multiselectComboBox.setItems("Item 1", "Item 2", "Item 3", "Item 4");
-        multiselectComboBox.addSelectionListener(event -> Notification.show(event.toString()));
+        multiselectComboBox.addSelectionListener(
+                event -> Notification.show(event.toString()));
 
         multiselectComboBox.setCompactMode(true);
 
         Button getValueBtn = new Button("Get value");
-        getValueBtn.addClickListener(event -> multiselectComboBoxValueChangeHandler(multiselectComboBox));
+        getValueBtn.addClickListener(
+                event -> multiselectComboBoxValueChangeHandler(
+                        multiselectComboBox));
 
         add(buildDemoContainer(multiselectComboBox, getValueBtn));
     }
 
-
     private void addOrderedDemo() {
         MultiselectComboBox<String> multiselectComboBox = new MultiselectComboBox();
-        multiselectComboBox.setLabel("Multiselect combo box with ordered selected items list");
+        multiselectComboBox.setLabel(
+                "Multiselect combo box with ordered selected items list");
         multiselectComboBox.setPlaceholder("Add");
         multiselectComboBox.setItems("Item 1", "Item 2", "Item 3", "Item 4");
-        multiselectComboBox.addSelectionListener(event -> Notification.show(event.toString()));
+        multiselectComboBox.addSelectionListener(
+                event -> Notification.show(event.toString()));
 
         multiselectComboBox.setOrdered(true);
 
         Button getValueBtn = new Button("Get value");
-        getValueBtn.addClickListener(event -> multiselectComboBoxValueChangeHandler(multiselectComboBox));
+        getValueBtn.addClickListener(
+                event -> multiselectComboBoxValueChangeHandler(
+                        multiselectComboBox));
 
         add(buildDemoContainer(multiselectComboBox, getValueBtn));
     }
 
-
-    private void multiselectComboBoxValueChangeHandler(MultiselectComboBox<String> multiselectComboBox) {
+    private void multiselectComboBoxValueChangeHandler(
+            MultiselectComboBox<String> multiselectComboBox) {
         Set<String> selectedItems = multiselectComboBox.getValue();
         String value = selectedItems.stream().collect(Collectors.joining(", "));
         Notification.show("Items value: " + value);
     }
 
-    private void objectMultiselectComboBoxValueChangeHandler(MultiselectComboBox<User> multiselectComboBox) {
+    private void objectMultiselectComboBoxValueChangeHandler(
+            MultiselectComboBox<User> multiselectComboBox) {
         Set<User> selectedItems = multiselectComboBox.getValue();
-        String value = selectedItems.stream().map(User::toString).collect(Collectors.joining(", "));
+        String value = selectedItems.stream().map(User::toString)
+                .collect(Collectors.joining(", "));
         Notification.show("Users value: " + value);
     }
 
-    private VerticalLayout buildDemoContainer(MultiselectComboBox multiselectComboBox, Button... actions) {
+    private VerticalLayout buildDemoContainer(
+            MultiselectComboBox multiselectComboBox, Button... actions) {
         VerticalLayout demoContainer = new VerticalLayout();
         demoContainer.getStyle().set("background-color", "#fcfcfc");
         demoContainer.getStyle().set("box-shadow", "1px 1px 1px 1px #ccc");
