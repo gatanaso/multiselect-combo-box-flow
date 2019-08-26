@@ -108,14 +108,36 @@ This can be overridden by setting an item label generator:
 // use the user email as an item label
 multiselectComboBox.setItemLabelGenerator(User::getEmail)
 ```
+## Version information
+* 2.x.x - the version for Vaadin 14
+* 1.x.x. - the version for Vaadin 13 and Vaadin 12
 
-### Running demos locally
+### Vaadin 12 support
+To use this component in a Vaadin 12+ project, 
+explicitly override the `vaadin-combo-box` dependency version by adding the following to your pom.xml file:
+```xml
+<dependency>
+	<groupId>org.webjars.bowergithub.vaadin</groupId>
+	<artifactId>vaadin-combo-box</artifactId>
+	<version>4.2.7</version>
+</dependency>
+```
+Optionally, to always use the latest version, a range can be specified as follows:
+```xml
+<version>[4.2.7, 5)</version>
+```
+
+## Branch information
+* `master` the latest version for Vaadin 14
+* `V13` the version for Vaadin 13 and Vaadin 12
+
+## Running demos locally
 
 1. Fork the `multiselect-combo-box-flow` repository and clone it locally.
 1. Build the project: `mvn clean install`
 1. Start the test/demo server: `mvn jetty:run`
 1. Navigate to http://localhost:8080 to view the demo.
 
-### Web Component
+## Web Component
 The `<multiselect-combo-box>` web component is available on [webcomponents.org](https://www.webcomponents.org/element/multiselect-combo-box), 
 the [Vaadin Directory](https://vaadin.com/directory/component/gatanasomultiselect-combo-box) and [GitHub](https://github.com/gatanaso/multiselect-combo-box).
