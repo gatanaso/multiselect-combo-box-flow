@@ -1,9 +1,11 @@
 package org.vaadin.gatanaso.demo;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.vaadin.gatanaso.MultiselectComboBox;
 
@@ -27,6 +29,7 @@ public class DemoView extends VerticalLayout {
         addRequiredDemo();
         addCompactModeDemo();
         addOrderedDemo();
+        addLazyLoadingDemo();
     }
 
     private void addTitle() {
@@ -139,6 +142,26 @@ public class DemoView extends VerticalLayout {
                 event -> Notification.show(event.toString()));
 
         multiselectComboBox.setOrdered(true);
+
+        Button getValueBtn = new Button("Get value");
+        getValueBtn.addClickListener(
+                event -> multiselectComboBoxValueChangeHandler(
+                        multiselectComboBox));
+
+        add(buildDemoContainer(multiselectComboBox, getValueBtn));
+    }
+
+    private void addLazyLoadingDemo() {
+        MultiselectComboBox<String> multiselectComboBox = new MultiselectComboBox();
+        multiselectComboBox.setLabel("Multiselect with lazy loading");
+        multiselectComboBox.setPlaceholder("Add");
+
+        List<String> items = new ArrayList<>();
+        IntStream.range(1, 1000).forEach(num -> items.add("Item " + num));
+        multiselectComboBox.setItems(items);
+
+        multiselectComboBox.addSelectionListener(
+                event -> Notification.show(event.toString()));
 
         Button getValueBtn = new Button("Get value");
         getValueBtn.addClickListener(
