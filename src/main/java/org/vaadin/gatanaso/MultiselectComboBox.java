@@ -1,13 +1,16 @@
 package org.vaadin.gatanaso;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.AbstractSinglePropertyField;
+import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
@@ -15,21 +18,32 @@ import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.data.binder.HasDataProvider;
+import com.vaadin.flow.data.binder.HasFilterableDataProvider;
+import com.vaadin.flow.data.provider.ArrayUpdater;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
+import com.vaadin.flow.data.provider.DataChangeEvent;
+import com.vaadin.flow.data.provider.DataCommunicator;
+import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.data.provider.DataProvider;
-import com.vaadin.flow.data.provider.KeyMapper;
+import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.selection.MultiSelect;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
 import com.vaadin.flow.data.selection.MultiSelectionListener;
+import com.vaadin.flow.function.SerializableBiPredicate;
+import com.vaadin.flow.function.SerializableConsumer;
+import com.vaadin.flow.function.SerializableFunction;
+import com.vaadin.flow.internal.JsonUtils;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.Json;
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
+import elemental.json.JsonValue;
 
 /**
  * A multiselection component where items are displayed in a drop-down list.
@@ -43,28 +57,65 @@ import elemental.json.JsonObject;
  * @author gatanaso
  */
 @Tag("multiselect-combo-box")
-@NpmPackage(value = "multiselect-combo-box", version = "2.0.2")
+@JavaScript("frontend://multiselectComboBoxConnector.js")
+@NpmPackage(value = "multiselect-combo-box", version = "2.0.3-alpha.1")
 @JsModule("multiselect-combo-box/src/multiselect-combo-box.js")
 public class MultiselectComboBox<T>
         extends AbstractSinglePropertyField<MultiselectComboBox<T>, Set<T>>
         implements HasStyle, HasSize, HasValidation, HasEnabled,
-        MultiSelect<MultiselectComboBox<T>, T>, HasDataProvider<T> {
+        MultiSelect<MultiselectComboBox<T>, T>,
+        HasFilterableDataProvider<T, String> {
 
     protected static final String ITEM_VALUE_PATH = "key";
     protected static final String ITEM_LABEL_PATH = "label";
     private final CompositeDataGenerator<T> dataGenerator = new CompositeDataGenerator<>();
+    /**
+     * Lazy loading updater, used when calling setDataProvider()
+     */
+    private final ArrayUpdater arrayUpdater = new ArrayUpdater() {
+        @Override
+        public Update startUpdate(int sizeChange) {
+            return new UpdateQueue(sizeChange);
+        }
+
+        @Override
+        public void initialize() {
+            // NO-OP
+        }
+    };
+    private DataCommunicator<T> dataCommunicator;
     private ItemLabelGenerator<T> itemLabelGenerator = String::valueOf;
-    private DataProvider<T, ?> dataProvider = DataProvider.ofItems();
-    private final KeyMapper<T> keyMapper = new KeyMapper<>(this::getItemId);
-    private Registration dataProviderListenerRegistration;
+    private SerializableConsumer<String> filterSlot = filter -> {
+        // Just ignore when setDataProvider has not been called
+    };
+    // Filter set by the client when requesting data. It's sent back to client
+    // together with the response so client may know for what filter data is
+    // provided.
+    private String lastFilter;
+    private UserProvidedFilter userProvidedFilter = UserProvidedFilter.UNDECIDED;
 
     /**
-     * Default constructor.
-     * <p>
-     * Creates an empty multiselect combo box.
-     * </p>
+     * Default constructor. Creates an empty multiselect combo box.
      */
     public MultiselectComboBox() {
+        this(50);
+    }
+
+    /**
+     * Creates an empty multiselect combo box with the defined page size for
+     * lazy loading.
+     * <p>
+     * The default page size is 50.
+     * <p>
+     * The page size is also the largest number of items that can support
+     * client-side filtering. If you provide more items than the page size, the
+     * component has to fall back to server-side filtering.
+     *
+     * @param pageSize
+     *            the amount of items to request at a time for lazy loading
+     * @see {@link #setPageSize(int)}
+     */
+    public MultiselectComboBox(int pageSize) {
         super("selectedItems", Collections.emptySet(), JsonArray.class,
                 MultiselectComboBox::presentationToModel,
                 MultiselectComboBox::modelToPresentation);
@@ -75,16 +126,32 @@ public class MultiselectComboBox<T>
         setItemIdPath(ITEM_VALUE_PATH);
         setItemValuePath(ITEM_VALUE_PATH);
         setItemLabelPath(ITEM_LABEL_PATH);
+        setPageSize(pageSize);
+
+        addAttachListener(e -> initConnector());
+
+        runBeforeClientResponse(ui -> {
+            // If user didn't provide any data, initialize with empty data set.
+            if (dataCommunicator == null) {
+                setItems();
+            }
+        });
     }
 
     private static <T> Set<T> presentationToModel(
             MultiselectComboBox<T> multiselectComboBox,
             JsonArray presentation) {
+
+        if (presentation == null
+                || multiselectComboBox.dataCommunicator == null) {
+            return multiselectComboBox.getEmptyValue();
+        }
+
         JsonArray array = presentation;
         Set<T> set = new HashSet<>();
         for (int i = 0; i < array.length(); i++) {
             String key = array.getObject(i).getString(ITEM_VALUE_PATH);
-            set.add(multiselectComboBox.keyMapper.get(key));
+            set.add(multiselectComboBox.getKeyMapper().get(key));
         }
         return set;
     }
@@ -92,7 +159,7 @@ public class MultiselectComboBox<T>
     private static <T> JsonArray modelToPresentation(
             MultiselectComboBox<T> multiselectComboBox, Set<T> model) {
         JsonArray array = Json.createArray();
-        if (model.isEmpty()) {
+        if (model == null || model.isEmpty()) {
             return array;
         }
 
@@ -100,6 +167,31 @@ public class MultiselectComboBox<T>
                 .forEach(jsonObject -> array.set(array.length(), jsonObject));
 
         return array;
+    }
+
+    @Override
+    public void setValue(Set<T> value) {
+        if (dataCommunicator == null) {
+            if (value == null) {
+                return;
+            } else {
+                throw new IllegalStateException(
+                        "Cannot set a value for a MultiselectComboBox without items. "
+                                + "Use setItems or setDataProvider to populate "
+                                + "items into the MultiselectComboBox before setting a value.");
+            }
+        }
+        super.setValue(value);
+        refreshValue();
+    }
+
+    private void refreshValue() {
+        Set<T> value = getValue();
+        if (value == null || value.isEmpty()) {
+            return;
+        }
+        JsonArray selectedItems = modelToPresentation(this, value);
+        getElement().setPropertyJson("selectedItems", selectedItems);
     }
 
     /**
@@ -270,10 +362,6 @@ public class MultiselectComboBox<T>
                 itemIdPath == null ? "" : itemIdPath);
     }
 
-    protected void setItems(JsonArray items) {
-        getElement().setPropertyJson("items", items);
-    }
-
     /**
      * Gets the item label generator.
      *
@@ -299,6 +387,55 @@ public class MultiselectComboBox<T>
                 "The item label generator can not be null");
         this.itemLabelGenerator = itemLabelGenerator;
         reset();
+        if (getValue() != null) {
+            refreshValue();
+        }
+    }
+
+    /**
+     * Sets the page size, which is the number of items requested at a time from
+     * the data provider. This does not guarantee a maximum query size to the
+     * backend; when the overlay has room to render more new items than the page
+     * size, multiple "pages" will be requested at once.
+     * <p>
+     * The page size is also the largest number of items that can support
+     * client-side filtering. If you provide more items than the page size, the
+     * component has to fall back to server-side filtering.
+     * <p>
+     * Setting the page size after the MultiselectComboBox has been rendered
+     * effectively resets the component, and the current page(s) and sent over
+     * again.
+     * <p>
+     * The default page size is 50.
+     *
+     * @param pageSize
+     *            the maximum number of items sent per request, should be
+     *            greater than zero
+     */
+    public void setPageSize(int pageSize) {
+        if (pageSize < 1) {
+            throw new IllegalArgumentException(
+                    "Page size should be greater than zero.");
+        }
+        getElement().setProperty("pageSize", pageSize);
+        reset();
+    }
+
+    /**
+     * Gets the page size, which is the number of items fetched at a time from
+     * the data provider.
+     * <p>
+     * The page size is also the largest number of items that can support
+     * client-side filtering. If you provide more items than the page size, the
+     * component has to fall back to server-side filtering.
+     * <p>
+     * The default page size is 50.
+     *
+     * @return the maximum number of items sent per request
+     * @see {@link #setPageSize(int)}
+     */
+    public int getPageSize() {
+        return getElement().getProperty("pageSize", 50);
     }
 
     /**
@@ -307,36 +444,19 @@ public class MultiselectComboBox<T>
      * @return the data provider, not {@code null}
      */
     public DataProvider<T, ?> getDataProvider() {
-        return dataProvider;
-    }
-
-    @Override
-    public void setDataProvider(DataProvider<T, ?> dataProvider) {
-        Objects.requireNonNull(dataProvider,
-                "The data provider can not be null");
-        this.dataProvider = dataProvider;
-        reset();
-        updateDataProviderListenerRegistration();
+        return dataCommunicator.getDataProvider();
     }
 
     private void reset() {
-        keyMapper.removeAll();
-        clear();
-        refreshItems();
-    }
-
-    private void refreshItems() {
-        Set<T> data = dataProvider.fetch(new Query<>())
-                .collect(Collectors.toCollection(LinkedHashSet::new));
-        setItems(modelToPresentation(this, data));
-    }
-
-    private void updateDataProviderListenerRegistration() {
-        if (dataProviderListenerRegistration != null) {
-            dataProviderListenerRegistration.remove();
+        lastFilter = null;
+        if (dataCommunicator != null) {
+            dataCommunicator.setRequestedRange(0, 0);
+            dataCommunicator.reset();
         }
-        dataProviderListenerRegistration = dataProvider
-                .addDataProviderListener(e -> refreshItems());
+        runBeforeClientResponse(ui -> ui.getPage().executeJs(
+                // If-statement is needed because on the first attach this
+                // JavaScript is called before initializing the connector.
+                "if($0.$connector) $0.$connector.reset();", getElement()));
     }
 
     private String generateLabel(T item) {
@@ -355,16 +475,19 @@ public class MultiselectComboBox<T>
 
     private JsonObject generateJson(T item) {
         JsonObject jsonObject = Json.createObject();
-        jsonObject.put(ITEM_VALUE_PATH, keyMapper.key(item));
+        jsonObject.put(ITEM_VALUE_PATH, getKeyMapper().key(item));
         dataGenerator.generateData(item, jsonObject);
         return jsonObject;
     }
 
-    private Object getItemId(T item) {
-        if (getDataProvider() == null) {
-            return item;
-        }
-        return getDataProvider().getId(item);
+    private void initConnector() {
+        getElement().executeJs(
+                "window.Vaadin.Flow.multiselectComboBoxConnector.initLazy(this)");
+    }
+
+    private void runBeforeClientResponse(SerializableConsumer<UI> command) {
+        getElement().getNode().runWhenAttached(ui -> ui
+                .beforeClientResponse(this, context -> command.accept(ui)));
     }
 
     @Override
@@ -386,5 +509,228 @@ public class MultiselectComboBox<T>
         return addValueChangeListener(event -> listener
                 .selectionChange(new MultiSelectionEvent<>(this, this,
                         event.getOldValue(), event.isFromClient())));
+    }
+
+    private DataKeyMapper<T> getKeyMapper() {
+        return dataCommunicator.getKeyMapper();
+    }
+
+    @ClientCallable
+    private void confirmUpdate(int id) {
+        dataCommunicator.confirmUpdate(id);
+    }
+
+    @ClientCallable
+    private void setRequestedRange(int start, int length, String filter) {
+        dataCommunicator.setRequestedRange(start, length);
+        filterSlot.accept(filter);
+    }
+
+    @ClientCallable
+    private void resetDataCommunicator() {
+        dataCommunicator.reset();
+    }
+
+    /**
+     * Sets a list data provider as the data provider of this multiselect combo
+     * box.
+     * <p>
+     * Filtering will use a case insensitive match to show all items where the
+     * filter text is a substring of the label displayed for that item, which
+     * you can configure with
+     * {@link #setItemLabelGenerator(ItemLabelGenerator)}.
+     * <p>
+     * Filtering will be handled in the client-side if the size of the data set
+     * is less than the page size. To force client-side filtering with a larger
+     * data set (at the cost of increased network traffic), you can increase the
+     * page size with {@link #setPageSize(int)}.
+     * <p>
+     * Changing the multiselect combo box's data provider resets its current
+     * value to {@code null}.
+     *
+     * @param listDataProvider
+     *            the list data provider to use, not <code>null</code>
+     */
+    public void setDataProvider(ListDataProvider<T> listDataProvider) {
+        if (userProvidedFilter == UserProvidedFilter.UNDECIDED) {
+            userProvidedFilter = UserProvidedFilter.NO;
+        }
+
+        // Cannot use the case insensitive contains shorthand from
+        // ListDataProvider since it wouldn't react to locale changes
+        ItemFilter<T> defaultItemFilter = (item,
+                filterText) -> generateLabel(item).toLowerCase(getLocale())
+                        .contains(filterText.toLowerCase(getLocale()));
+
+        setDataProvider(defaultItemFilter, listDataProvider);
+    }
+
+    /**
+     * Sets a list data provider with an item filter as the data provider of
+     * this multiselect combo box. The item filter is used to compare each item
+     * to the filter text entered by the user.
+     * <p>
+     * Note that defining a custom filter will force the component to make
+     * server round trips to handle the filtering. Otherwise it can handle
+     * filtering in the client-side, if the size of the data set is less than
+     * the {@link #setPageSize(int) pageSize}.
+     * <p>
+     * Changing the multiselect combo box's data provider resets its current
+     * value to {@code null}.
+     *
+     * @param itemFilter
+     *            filter to check if an item is shown when user typed some text
+     *            into the MultiselectComboBox
+     * @param listDataProvider
+     *            the list data provider to use, not <code>null</code>
+     */
+    public void setDataProvider(ItemFilter<T> itemFilter,
+            ListDataProvider<T> listDataProvider) {
+
+        Objects.requireNonNull(listDataProvider,
+                "List data provider cannot be null");
+        setDataProvider(listDataProvider,
+                filterText -> item -> itemFilter.test(item, filterText));
+    }
+
+    @Override
+    public void setItems(Collection<T> items) {
+        setDataProvider(DataProvider.ofCollection(items));
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * The filter-type of the given data provider must be String so that it can
+     * handle the filters typed into the MultiselectComboBox by users. If your
+     * data provider uses some other type of filter, you can provide a function
+     * which converts the MultiselectComboBox's filter-string into that type via
+     * {@link #setDataProvider(DataProvider, SerializableFunction)}. Another way
+     * to do the same thing is to use this method with your data provider
+     * converted with
+     * {@link DataProvider#withConvertedFilter(SerializableFunction)}.
+     * <p>
+     * Changing the multiselect combo box's data provider resets its current
+     * value to {@code null}.
+     */
+    @Override
+    public void setDataProvider(DataProvider<T, String> dataProvider) {
+        setDataProvider(dataProvider, SerializableFunction.identity());
+    }
+
+    @Override
+    public <C> void setDataProvider(DataProvider<T, C> dataProvider,
+            SerializableFunction<String, C> filterConverter) {
+
+        Objects.requireNonNull(dataProvider,
+                "The data provider can not be null");
+        Objects.requireNonNull(filterConverter,
+                "filterConverter cannot be null");
+
+        if (userProvidedFilter == UserProvidedFilter.UNDECIDED) {
+            userProvidedFilter = UserProvidedFilter.YES;
+        }
+
+        if (dataCommunicator == null) {
+            dataCommunicator = new DataCommunicator<>(dataGenerator,
+                    arrayUpdater, data -> getElement()
+                            .callJsFunction("$connector.updateData", data),
+                    getElement().getNode());
+        }
+
+        setValue(null);
+
+        SerializableFunction<String, C> convertOrNull = filterText -> {
+            if (filterText == null) {
+                return null;
+            }
+
+            return filterConverter.apply(filterText);
+        };
+
+        SerializableConsumer<C> providerFilterSlot = dataCommunicator
+                .setDataProvider(dataProvider, convertOrNull.apply(null));
+
+        filterSlot = filter -> {
+            if (!Objects.equals(filter, lastFilter)) {
+                providerFilterSlot.accept(convertOrNull.apply(filter));
+                lastFilter = filter;
+            }
+        };
+
+        boolean shouldForceServerSideFiltering = userProvidedFilter == UserProvidedFilter.YES;
+
+        dataProvider.addDataProviderListener(e -> {
+            if (e instanceof DataChangeEvent.DataRefreshEvent) {
+                dataCommunicator.refresh(
+                        ((DataChangeEvent.DataRefreshEvent<T>) e).getItem());
+            } else {
+                refreshAllData(shouldForceServerSideFiltering);
+            }
+        });
+        refreshAllData(shouldForceServerSideFiltering);
+
+        userProvidedFilter = UserProvidedFilter.UNDECIDED;
+    }
+
+    private void refreshAllData(boolean forceServerSideFiltering) {
+        setClientSideFilter(!forceServerSideFiltering && getDataProvider()
+                .size(new Query<>()) <= getPageSizeDouble());
+
+        reset();
+    }
+
+    private double getPageSizeDouble() {
+        return getElement().getProperty("pageSize", 0.0);
+    }
+
+    private void setClientSideFilter(boolean clientSideFilter) {
+        getElement().setProperty("_clientSideFilter", clientSideFilter);
+    }
+
+    private enum UserProvidedFilter {
+        UNDECIDED, YES, NO
+    }
+
+    /**
+     * Predicate to check {@link MultiselectComboBox} items against user typed
+     * strings.
+     */
+    @FunctionalInterface
+    public interface ItemFilter<T> extends SerializableBiPredicate<T, String> {
+        @Override
+        public boolean test(T item, String filterText);
+    }
+
+    private final class UpdateQueue implements ArrayUpdater.Update {
+        private transient List<Runnable> queue = new ArrayList<>();
+
+        private UpdateQueue(int size) {
+            enqueue("$connector.updateSize", size);
+        }
+
+        @Override
+        public void set(int start, List<JsonValue> items) {
+            enqueue("$connector.set", start,
+                    items.stream().collect(JsonUtils.asArray()),
+                    MultiselectComboBox.this.lastFilter);
+        }
+
+        @Override
+        public void clear(int start, int length) {
+            // NO-OP
+        }
+
+        @Override
+        public void commit(int updateId) {
+            enqueue("$connector.confirm", updateId,
+                    MultiselectComboBox.this.lastFilter);
+            queue.forEach(Runnable::run);
+            queue.clear();
+        }
+
+        private void enqueue(String name, Serializable... arguments) {
+            queue.add(() -> getElement().callJsFunction(name, arguments));
+        }
     }
 }
