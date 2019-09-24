@@ -19,7 +19,6 @@ import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.data.binder.HasFilterableDataProvider;
@@ -54,10 +53,28 @@ import elemental.json.JsonValue;
  * displaying, selection and filtering of multiple items from a drop-down list.
  * </p>
  *
+ <p>
+ * MultiselectComboBox supports lazy loading. This means that when using large data sets,
+ * items are requested from the server one "page" at a time when the user
+ * scrolls down the overlay. The number of items in one page is by default 50,
+ * and can be changed with {@link #setPageSize(int)}.
+ * <p>
+ * MultiselectComboBox can do filtering either in the browser or in the server. When
+ * MultiselectComboBox has only a relatively small set of items, the filtering will happen
+ * in the browser, allowing smooth user-experience. When the size of the data
+ * set is larger than the {@code pageSize}, the webcomponent doesn't necessarily
+ * have all the data available and it will make requests to the server to handle
+ * the filtering. Also, if you have defined custom filtering logic, with eg.
+ * {@link #setItems(ItemFilter, Collection)}, filtering will happen in the
+ * server. To enable client-side filtering with larger data sets, you can
+ * override the {@code pageSize} to be bigger than the size of your data set.
+ * However, then the full data set will be sent to the client immediately and
+ * you will lose the benefits of lazy loading.
+ *
  * @author gatanaso
  */
 @Tag("multiselect-combo-box")
-@JavaScript("frontend://multiselectComboBoxConnector.js")
+@JsModule("./multiselectComboBoxConnector.js")
 @NpmPackage(value = "multiselect-combo-box", version = "2.0.3-alpha.1")
 @JsModule("multiselect-combo-box/src/multiselect-combo-box.js")
 public class MultiselectComboBox<T>
@@ -563,6 +580,32 @@ public class MultiselectComboBox<T>
                         .contains(filterText.toLowerCase(getLocale()));
 
         setDataProvider(defaultItemFilter, listDataProvider);
+    }
+
+    /**
+     * Sets the data items of this multiselect combo box and a filtering function for
+     * defining which items are displayed when user types into the combo box.
+     * <p>
+     * Note that defining a custom filter will force the component to make
+     * server round trips to handle the filtering. Otherwise, it can handle
+     * filtering in the client-side, if the size of the data set is less than
+     * the {@link #setPageSize(int) pageSize}.
+     * <p>
+     * Setting the items creates a new DataProvider, which in turn resets the
+     * combo box's value to {@code null}. If you want to add and remove items to
+     * the current item set without resetting the value, you should update the
+     * previously set item collection and call
+     * {@code getDataProvider().refreshAll()}.
+     *
+     * @param itemFilter
+     *            filter to check if an item is shown when user typed some text
+     *            into the ComboBox
+     * @param items
+     *            the data items to display
+     */
+    public void setItems(ItemFilter<T> itemFilter, Collection<T> items) {
+        ListDataProvider<T> listDataProvider = DataProvider.ofCollection(items);
+        setDataProvider(itemFilter, listDataProvider);
     }
 
     /**
