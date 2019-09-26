@@ -2,12 +2,14 @@ package org.vaadin.gatanaso;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.ClientCallable;
@@ -24,6 +26,7 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.data.binder.HasFilterableDataProvider;
 import com.vaadin.flow.data.provider.ArrayUpdater;
+import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataCommunicator;
@@ -50,14 +53,35 @@ import elemental.json.JsonValue;
  *
  * <p>
  * This is the server-side component for the `multiselect-combo-box`
- * webcomponent. It contains the same features as the webcomponent, such as
+ * web component. It contains the same features as the web component, such as
  * displaying, selection and filtering of multiple items from a drop-down list.
  * </p>
+ *
+ * <p>
+ * MultiselectComboBox supports lazy loading. This means that when using large
+ * data sets, items are requested from the server one "page" at a time when the
+ * user scrolls down the overlay. The number of items in one page is by default
+ * 50, and can be changed with {@link #setPageSize(int)}.
+ * <p>
+ * MultiselectComboBox can do filtering either in the browser or in the server.
+ * When MultiselectComboBox has only a relatively small set of items, the
+ * filtering will happen in the browser, allowing smooth user-experience. When
+ * the size of the data set is larger than the {@code pageSize}, the
+ * web component doesn't necessarily have all the data available and it will make
+ * requests to the server to handle the filtering. Also, if you have defined
+ * custom filtering logic, with eg. {@link #setItems(ItemFilter, Collection)},
+ * filtering will happen in the server. To enable client-side filtering with
+ * larger data sets, you can override the {@code pageSize} to be bigger than the
+ * size of your data set. However, then the full data set will be sent to the
+ * client immediately and you will lose the benefits of lazy loading.
+ *
+ * @param <T>
+ *            the type of the items to be inserted in the multiselect combo box
  *
  * @author gatanaso
  */
 @Tag("multiselect-combo-box")
-@JavaScript("frontend://multiselectComboBoxConnector.js")
+@JavaScript("./multiselectComboBoxConnector.js")
 @NpmPackage(value = "multiselect-combo-box", version = "2.0.3-alpha.1")
 @JsModule("multiselect-combo-box/src/multiselect-combo-box.js")
 public class MultiselectComboBox<T>
@@ -68,7 +92,9 @@ public class MultiselectComboBox<T>
 
     protected static final String ITEM_VALUE_PATH = "key";
     protected static final String ITEM_LABEL_PATH = "label";
+
     private final CompositeDataGenerator<T> dataGenerator = new CompositeDataGenerator<>();
+
     /**
      * Lazy loading updater, used when calling setDataProvider()
      */
@@ -83,15 +109,19 @@ public class MultiselectComboBox<T>
             // NO-OP
         }
     };
+
     private DataCommunicator<T> dataCommunicator;
     private ItemLabelGenerator<T> itemLabelGenerator = String::valueOf;
+
     private SerializableConsumer<String> filterSlot = filter -> {
         // Just ignore when setDataProvider has not been called
     };
+
     // Filter set by the client when requesting data. It's sent back to client
     // together with the response so client may know for what filter data is
     // provided.
     private String lastFilter;
+
     private UserProvidedFilter userProvidedFilter = UserProvidedFilter.UNDECIDED;
 
     /**
@@ -138,6 +168,50 @@ public class MultiselectComboBox<T>
         });
     }
 
+    /**
+     * Creates an empty multiselect combo box with the defined label.
+     *
+     * @param label
+     *            the label describing the combo box
+     */
+    public MultiselectComboBox(String label) {
+        this();
+        setLabel(label);
+    }
+
+    /**
+     * Creates a multiselect combo box with the defined label and populated with
+     * the items in the collection.
+     *
+     * @param label
+     *            the label describing the combo box
+     * @param items
+     *            the items to be shown in the list of the combo box
+     * @see #setItems(Collection)
+     */
+    public MultiselectComboBox(String label, Collection<T> items) {
+        this();
+        setLabel(label);
+        setItems(items);
+    }
+
+    /**
+     * Creates a multiselect combo box with the defined label and populated with
+     * the items in the array.
+     *
+     * @param label
+     *            the label describing the combo box
+     * @param items
+     *            the items to be shown in the list of the combo box
+     * @see #setItems(Object...)
+     */
+    @SafeVarargs
+    public MultiselectComboBox(String label, T... items) {
+        this();
+        setLabel(label);
+        setItems(items);
+    }
+
     private static <T> Set<T> presentationToModel(
             MultiselectComboBox<T> multiselectComboBox,
             JsonArray presentation) {
@@ -147,10 +221,9 @@ public class MultiselectComboBox<T>
             return multiselectComboBox.getEmptyValue();
         }
 
-        JsonArray array = presentation;
         Set<T> set = new HashSet<>();
-        for (int i = 0; i < array.length(); i++) {
-            String key = array.getObject(i).getString(ITEM_VALUE_PATH);
+        for (int i = 0; i < presentation.length(); i++) {
+            String key = presentation.getObject(i).getString(ITEM_VALUE_PATH);
             set.add(multiselectComboBox.getKeyMapper().get(key));
         }
         return set;
@@ -532,8 +605,7 @@ public class MultiselectComboBox<T>
     }
 
     /**
-     * Sets a list data provider as the data provider of this multiselect combo
-     * box.
+     * {@inheritDoc}
      * <p>
      * Filtering will use a case insensitive match to show all items where the
      * filter text is a substring of the label displayed for that item, which
@@ -545,57 +617,69 @@ public class MultiselectComboBox<T>
      * data set (at the cost of increased network traffic), you can increase the
      * page size with {@link #setPageSize(int)}.
      * <p>
-     * Changing the multiselect combo box's data provider resets its current
-     * value to {@code null}.
-     *
-     * @param listDataProvider
-     *            the list data provider to use, not <code>null</code>
+     * Setting the items creates a new DataProvider, which in turn resets the
+     * multiselect combo box's value to {@code null}. If you want to add and
+     * remove items to the current item set without resetting the value, you
+     * should update the previously set item collection and call
+     * {@code getDataProvider().refreshAll()}.
      */
-    public void setDataProvider(ListDataProvider<T> listDataProvider) {
-        if (userProvidedFilter == UserProvidedFilter.UNDECIDED) {
-            userProvidedFilter = UserProvidedFilter.NO;
-        }
-
-        // Cannot use the case insensitive contains shorthand from
-        // ListDataProvider since it wouldn't react to locale changes
-        ItemFilter<T> defaultItemFilter = (item,
-                filterText) -> generateLabel(item).toLowerCase(getLocale())
-                        .contains(filterText.toLowerCase(getLocale()));
-
-        setDataProvider(defaultItemFilter, listDataProvider);
+    @Override
+    public void setItems(Collection<T> items) {
+        setDataProvider(DataProvider.ofCollection(items));
     }
 
     /**
-     * Sets a list data provider with an item filter as the data provider of
-     * this multiselect combo box. The item filter is used to compare each item
-     * to the filter text entered by the user.
+     * Sets the data items of this multiselect combo box and a filtering
+     * function for defining which items are displayed when user types into the
+     * combo box.
+     * <p>
+     * Note that defining a custom filter will force the component to make
+     * server round trips to handle the filtering. Otherwise, it can handle
+     * filtering in the client-side, if the size of the data set is less than
+     * the {@link #setPageSize(int) pageSize}.
+     * <p>
+     * Setting the items creates a new DataProvider, which in turn resets the
+     * combo box's value to {@code null}. If you want to add and remove items to
+     * the current item set without resetting the value, you should update the
+     * previously set item collection and call
+     * {@code getDataProvider().refreshAll()}.
+     *
+     * @param itemFilter
+     *            filter to check if an item is shown when user typed some text
+     *            into the MultiselectComboBox
+     * @param items
+     *            the data items to display
+     */
+    public void setItems(ItemFilter<T> itemFilter, Collection<T> items) {
+        ListDataProvider<T> listDataProvider = DataProvider.ofCollection(items);
+
+        setDataProvider(itemFilter, listDataProvider);
+    }
+
+    /**
+     * Sets the data items of this multiselect combo box and a filtering
+     * function for defining which items are displayed when user types into the
+     * combo box.
      * <p>
      * Note that defining a custom filter will force the component to make
      * server round trips to handle the filtering. Otherwise it can handle
      * filtering in the client-side, if the size of the data set is less than
      * the {@link #setPageSize(int) pageSize}.
      * <p>
-     * Changing the multiselect combo box's data provider resets its current
-     * value to {@code null}.
+     * Setting the items creates a new DataProvider, which in turn resets the
+     * combo box's value to {@code null}. If you want to add and remove items to
+     * the current item set without resetting the value, you should update the
+     * previously set item collection and call
+     * {@code getDataProvider().refreshAll()}.
      *
      * @param itemFilter
      *            filter to check if an item is shown when user typed some text
      *            into the MultiselectComboBox
-     * @param listDataProvider
-     *            the list data provider to use, not <code>null</code>
+     * @param items
+     *            the data items to display
      */
-    public void setDataProvider(ItemFilter<T> itemFilter,
-            ListDataProvider<T> listDataProvider) {
-
-        Objects.requireNonNull(listDataProvider,
-                "List data provider cannot be null");
-        setDataProvider(listDataProvider,
-                filterText -> item -> itemFilter.test(item, filterText));
-    }
-
-    @Override
-    public void setItems(Collection<T> items) {
-        setDataProvider(DataProvider.ofCollection(items));
+    public void setItems(ItemFilter<T> itemFilter, T... items) {
+        setItems(itemFilter, Arrays.asList(items));
     }
 
     /**
@@ -618,6 +702,23 @@ public class MultiselectComboBox<T>
         setDataProvider(dataProvider, SerializableFunction.identity());
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * MultiselectComboBox triggers filtering queries based on the strings users
+     * type into the field. For this reason you need to provide the second
+     * parameter, a function which converts the filter-string typed by the user
+     * into filter-type used by your data provider. If your data provider
+     * already supports String as the filter-type, it can be used without a
+     * converter function via {@link #setDataProvider(DataProvider)}.
+     * <p>
+     * Using this method provides the same result as using a data provider
+     * wrapped with
+     * {@link DataProvider#withConvertedFilter(SerializableFunction)}.
+     * <p>
+     * Changing the multiselect combo box's data provider resets its current
+     * value to {@code null}.
+     */
     @Override
     public <C> void setDataProvider(DataProvider<T, C> dataProvider,
             SerializableFunction<String, C> filterConverter) {
@@ -673,6 +774,95 @@ public class MultiselectComboBox<T>
         userProvidedFilter = UserProvidedFilter.UNDECIDED;
     }
 
+    /**
+     * Sets a list data provider as the data provider of this multiselect combo
+     * box.
+     * <p>
+     * Filtering will use a case insensitive match to show all items where the
+     * filter text is a substring of the label displayed for that item, which
+     * you can configure with
+     * {@link #setItemLabelGenerator(ItemLabelGenerator)}.
+     * <p>
+     * Filtering will be handled in the client-side if the size of the data set
+     * is less than the page size. To force client-side filtering with a larger
+     * data set (at the cost of increased network traffic), you can increase the
+     * page size with {@link #setPageSize(int)}.
+     * <p>
+     * Changing the multiselect combo box's data provider resets its current
+     * value to {@code null}.
+     *
+     * @param listDataProvider
+     *            the list data provider to use, not <code>null</code>
+     */
+    public void setDataProvider(ListDataProvider<T> listDataProvider) {
+        if (userProvidedFilter == UserProvidedFilter.UNDECIDED) {
+            userProvidedFilter = UserProvidedFilter.NO;
+        }
+
+        // Cannot use the case insensitive contains shorthand from
+        // ListDataProvider since it wouldn't react to locale changes
+        ItemFilter<T> defaultItemFilter = (item,
+                filterText) -> generateLabel(item).toLowerCase(getLocale())
+                        .contains(filterText.toLowerCase(getLocale()));
+
+        setDataProvider(defaultItemFilter, listDataProvider);
+    }
+
+    /**
+     * Sets a CallbackDataProvider using the given fetch items callback and a
+     * size callback.
+     * <p>
+     * This method is a shorthand for making a {@link CallbackDataProvider} that
+     * handles a partial Query object.
+     * <p>
+     * Changing the multiselect combo box's data provider resets its current
+     * value to {@code null}.
+     *
+     * @param fetchItems
+     *            a callback for fetching items
+     * @param sizeCallback
+     *            a callback for getting the count of items
+     *
+     * @see CallbackDataProvider
+     * @see #setDataProvider(DataProvider)
+     */
+    public void setDataProvider(FetchItemsCallback<T> fetchItems,
+            SerializableFunction<String, Integer> sizeCallback) {
+        userProvidedFilter = UserProvidedFilter.YES;
+        setDataProvider(new CallbackDataProvider<>(
+                q -> fetchItems.fetchItems(q.getFilter().orElse(""),
+                        q.getOffset(), q.getLimit()),
+                q -> sizeCallback.apply(q.getFilter().orElse(""))));
+    }
+
+    /**
+     * Sets a list data provider with an item filter as the data provider of
+     * this multiselect combo box. The item filter is used to compare each item
+     * to the filter text entered by the user.
+     * <p>
+     * Note that defining a custom filter will force the component to make
+     * server round trips to handle the filtering. Otherwise it can handle
+     * filtering in the client-side, if the size of the data set is less than
+     * the {@link #setPageSize(int) pageSize}.
+     * <p>
+     * Changing the multiselect combo box's data provider resets its current
+     * value to {@code null}.
+     *
+     * @param itemFilter
+     *            filter to check if an item is shown when user typed some text
+     *            into the MultiselectComboBox
+     * @param listDataProvider
+     *            the list data provider to use, not <code>null</code>
+     */
+    public void setDataProvider(ItemFilter<T> itemFilter,
+            ListDataProvider<T> listDataProvider) {
+
+        Objects.requireNonNull(listDataProvider,
+                "List data provider cannot be null");
+        setDataProvider(listDataProvider,
+                filterText -> item -> itemFilter.test(item, filterText));
+    }
+
     private void refreshAllData(boolean forceServerSideFiltering) {
         setClientSideFilter(!forceServerSideFiltering && getDataProvider()
                 .size(new Query<>()) <= getPageSizeDouble());
@@ -700,6 +890,30 @@ public class MultiselectComboBox<T>
     public interface ItemFilter<T> extends SerializableBiPredicate<T, String> {
         @Override
         public boolean test(T item, String filterText);
+    }
+
+    /**
+     * A callback method for fetching items. The callback is provided with a
+     * non-null string filter, offset index and limit.
+     *
+     * @param <T>
+     *            item (bean) type in MultiselectComboBox
+     */
+    @FunctionalInterface
+    public interface FetchItemsCallback<T> extends Serializable {
+        /**
+         * Returns a stream of items that match the given filter, limiting the
+         * results with given offset and limit.
+         *
+         * @param filter
+         *            a non-null filter string
+         * @param offset
+         *            the first index to fetch
+         * @param limit
+         *            the fetched item count
+         * @return stream of items
+         */
+        public Stream<T> fetchItems(String filter, int offset, int limit);
     }
 
     private final class UpdateQueue implements ArrayUpdater.Update {
