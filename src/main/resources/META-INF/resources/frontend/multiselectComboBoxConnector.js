@@ -1,7 +1,8 @@
-// ES6 connector for the MultiselectComboBox (based on the ComboBox connector)
+// Connector for the MultiselectComboBox (based on the ComboBox connector)
 
-import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
-import { timeOut } from '@polymer/polymer/lib/utils/async.js';
+// Not using ES6 imports in this file yet because the connector in V14 must
+// still work in Legacy bower projects.
+window.Vaadin.Flow.Legacy = window.Vaadin.Flow.Legacy || {};
 
 window.Vaadin.Flow.multiselectComboBoxConnector = {
   initLazy: function (multiselectComboBox) {
@@ -10,6 +11,18 @@ window.Vaadin.Flow.multiselectComboBoxConnector = {
     if (multiselectComboBox.$connector) {
       return;
     }
+
+    if (window.Polymer) {
+      // Polymer2 approach.
+      window.Vaadin.Flow.Legacy.Debouncer = window.Vaadin.Flow.Legacy.Debouncer || Polymer.Debouncer;
+      window.Vaadin.Flow.Legacy.timeOut = window.Vaadin.Flow.Legacy.timeOut || Polymer.Async.timeOut;
+    } else if (!window.Vaadin.Flow.Legacy.Debouncer) {
+      console.log("MultiselectComboBox is unable to load Polymer helpers.");
+      return;
+    }
+
+    const Debouncer = window.Vaadin.Flow.Legacy.Debouncer;
+    const timeOut = window.Vaadin.Flow.Legacy.timeOut;
 
     multiselectComboBox.$connector = {};
 

@@ -81,9 +81,10 @@ import elemental.json.JsonValue;
  * @author gatanaso
  */
 @Tag("multiselect-combo-box")
-@JavaScript("./multiselectComboBoxConnector.js")
 @NpmPackage(value = "multiselect-combo-box", version = "2.0.3-alpha.1")
 @JsModule("multiselect-combo-box/src/multiselect-combo-box.js")
+@JavaScript("frontend://multiselectComboBoxConnector.js")
+@JsModule("./multiselectComboBoxConnector-es6.js")
 public class MultiselectComboBox<T>
         extends AbstractSinglePropertyField<MultiselectComboBox<T>, Set<T>>
         implements HasStyle, HasSize, HasValidation, HasEnabled,
