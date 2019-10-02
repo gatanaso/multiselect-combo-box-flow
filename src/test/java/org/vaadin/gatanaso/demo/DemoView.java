@@ -1,6 +1,5 @@
 package org.vaadin.gatanaso.demo;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -156,8 +155,7 @@ public class DemoView extends VerticalLayout {
         multiselectComboBox.setLabel("Multiselect with lazy loading");
         multiselectComboBox.setPlaceholder("Add");
 
-        List<String> items = new ArrayList<>();
-        IntStream.range(1, 1000).forEach(num -> items.add("Item " + num));
+        List<String> items =IntStream.range(1, 10000).mapToObj(num -> "Item " + num).collect(Collectors.toList());
         multiselectComboBox.setItems(items);
 
         multiselectComboBox.addSelectionListener(

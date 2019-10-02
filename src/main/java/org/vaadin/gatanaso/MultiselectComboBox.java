@@ -81,7 +81,7 @@ import elemental.json.JsonValue;
  * @author gatanaso
  */
 @Tag("multiselect-combo-box")
-@NpmPackage(value = "multiselect-combo-box", version = "2.0.3-alpha.1")
+@NpmPackage(value = "multiselect-combo-box", version = "2.0.3-alpha.2")
 @JsModule("multiselect-combo-box/src/multiselect-combo-box.js")
 @JavaScript("frontend://multiselectComboBoxConnector.js")
 @JsModule("./multiselectComboBoxConnector-es6.js")
@@ -144,7 +144,7 @@ public class MultiselectComboBox<T>
      *
      * @param pageSize
      *            the amount of items to request at a time for lazy loading
-     * @see {@link #setPageSize(int)}
+     * @see #setPageSize
      */
     public MultiselectComboBox(int pageSize) {
         super("selectedItems", Collections.emptySet(), JsonArray.class,
@@ -506,7 +506,7 @@ public class MultiselectComboBox<T>
      * The default page size is 50.
      *
      * @return the maximum number of items sent per request
-     * @see {@link #setPageSize(int)}
+     * @see #setPageSize
      */
     public int getPageSize() {
         return getElement().getProperty("pageSize", 50);
