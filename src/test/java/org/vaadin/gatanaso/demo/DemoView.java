@@ -29,6 +29,7 @@ public class DemoView extends VerticalLayout {
         addCompactModeDemo();
         addOrderedDemo();
         addLazyLoadingDemo();
+        addClearButtonVisibleDemo();
     }
 
     private void addTitle() {
@@ -160,6 +161,24 @@ public class DemoView extends VerticalLayout {
 
         multiselectComboBox.addSelectionListener(
                 event -> Notification.show(event.toString()));
+
+        Button getValueBtn = new Button("Get value");
+        getValueBtn.addClickListener(
+                event -> multiselectComboBoxValueChangeHandler(
+                        multiselectComboBox));
+
+        add(buildDemoContainer(multiselectComboBox, getValueBtn));
+    }
+
+    private void addClearButtonVisibleDemo() {
+        MultiselectComboBox<String> multiselectComboBox = new MultiselectComboBox();
+        multiselectComboBox.setLabel("Multiselect combo box with `clear-button-visible`");
+        multiselectComboBox.setPlaceholder("Add");
+        multiselectComboBox.setItems("Item 1", "Item 2", "Item 3", "Item 4");
+        multiselectComboBox.addSelectionListener(
+                event -> Notification.show(event.toString()));
+
+        multiselectComboBox.setClearButtonVisible(true);
 
         Button getValueBtn = new Button("Get value");
         getValueBtn.addClickListener(

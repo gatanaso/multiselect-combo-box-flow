@@ -81,7 +81,7 @@ import elemental.json.JsonValue;
  * @author gatanaso
  */
 @Tag("multiselect-combo-box")
-@NpmPackage(value = "multiselect-combo-box", version = "2.0.3")
+@NpmPackage(value = "multiselect-combo-box", version = "2.1.0")
 @JsModule("multiselect-combo-box/src/multiselect-combo-box.js")
 @JavaScript("frontend://multiselectComboBoxConnector.js")
 @JsModule("./multiselectComboBoxConnector-es6.js")
@@ -419,6 +419,32 @@ public class MultiselectComboBox<T>
     public void setErrorMessage(String errorMessage) {
         getElement().setProperty("errorMessage",
                 errorMessage == null ? "" : errorMessage);
+    }
+
+    /**
+     * <p>
+     * Set to true to display the clear icon which clears the input.
+     * <p>
+     * This property is not synchronized automatically from the client side, so
+     * the returned value may not be the same as in client side.
+     * </p>
+     *
+     * @return the {@code clearButtonVisible} property from the web component
+     */
+    public boolean isClearButtonVisible() {
+        return getElement().getProperty("clearButtonVisible", false);
+    }
+
+    /**
+     * <p>
+     * Set to true to display the clear icon which clears the input.
+     * </p>
+     *
+     * @param clearButtonVisible
+     *            the boolean value to set
+     */
+    public void setClearButtonVisible(boolean clearButtonVisible) {
+        getElement().setProperty("clearButtonVisible", clearButtonVisible);
     }
 
     private void setItemValuePath(String itemValuePath) {

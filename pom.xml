@@ -3,7 +3,7 @@
 
     <groupId>org.vaadin.gatanaso</groupId>
     <artifactId>multiselect-combo-box-flow</artifactId>
-    <version>2.1.0</version>
+    <version>2.2.0</version>
     <name>Multiselect Combo Box</name>
     <description>Integration of multiselect-combo-box for Vaadin platform</description>
 
@@ -114,6 +114,10 @@
                             <Vaadin-Package-Version>1</Vaadin-Package-Version>
                         </manifestEntries>
                     </archive>
+                    <!-- Generated file that shouldn't be included in add-ons -->
+                    <excludes>
+                        <exclude>META-INF/VAADIN/config/flow-build-info.json</exclude>
+                    </excludes>
                 </configuration>
             </plugin>
 			<plugin>
