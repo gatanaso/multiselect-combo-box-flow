@@ -202,6 +202,21 @@ public class MultiselectComboBoxTest {
     }
 
     @Test
+    public void shouldSetClearButtonVisible() {
+        // given
+        MultiselectComboBox<String> multiselectComboBox = new MultiselectComboBox<>();
+
+        Assert.assertFalse(multiselectComboBox.isClearButtonVisible());
+
+        // when
+        multiselectComboBox.setClearButtonVisible(true);
+
+        // then
+        assertThat(multiselectComboBox.isClearButtonVisible(), is(true));
+        assertThat(multiselectComboBox.getElement().getProperty("clearButtonVisible"), is("true"));
+    }
+
+    @Test
     public void shouldUpdateDataProviderAndResetValueToEmpty() {
         // given
         MultiselectComboBox<Object> multiselectComboBox = new MultiselectComboBox<>();
