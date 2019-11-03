@@ -1,5 +1,12 @@
 package org.vaadin.gatanaso;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasSize;
@@ -18,16 +25,10 @@ import com.vaadin.flow.data.selection.MultiSelect;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
 import com.vaadin.flow.data.selection.MultiSelectionListener;
 import com.vaadin.flow.shared.Registration;
+
 import elemental.json.Json;
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
-
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * A multiselection component where items are displayed in a drop-down list.
@@ -228,6 +229,32 @@ public class MultiselectComboBox<T>
     @Override
     public void setErrorMessage(String errorMessage) {
         getElement().setProperty("errorMessage", errorMessage == null ? "" : errorMessage);
+    }
+
+    /**
+     * <p>
+     * Set to true to display the clear icon which clears the input.
+     * <p>
+     * This property is not synchronized automatically from the client side, so
+     * the returned value may not be the same as in client side.
+     * </p>
+     *
+     * @return the {@code clearButtonVisible} property from the web component
+     */
+    public boolean isClearButtonVisible() {
+        return getElement().getProperty("clearButtonVisible", false);
+    }
+
+    /**
+     * <p>
+     * Set to true to display the clear icon which clears the input.
+     * </p>
+     *
+     * @param clearButtonVisible
+     *            the boolean value to set
+     */
+    public void setClearButtonVisible(boolean clearButtonVisible) {
+        getElement().setProperty("clearButtonVisible", clearButtonVisible);
     }
 
     private void setItemValuePath(String itemValuePath) {

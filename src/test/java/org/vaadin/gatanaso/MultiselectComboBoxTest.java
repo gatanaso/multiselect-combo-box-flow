@@ -1,17 +1,18 @@
 package org.vaadin.gatanaso;
 
-import com.vaadin.flow.data.provider.ConfigurableFilterDataProvider;
-import com.vaadin.flow.data.provider.DataProvider;
-import com.vaadin.flow.data.provider.Query;
-import com.vaadin.flow.function.SerializablePredicate;
-import org.junit.Assert;
-import org.junit.Test;
-
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import org.junit.Assert;
+import org.junit.Test;
+
+import com.vaadin.flow.data.provider.ConfigurableFilterDataProvider;
+import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.function.SerializablePredicate;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
@@ -186,6 +187,21 @@ public class MultiselectComboBoxTest {
         assertThat(multiselectComboBox.items, hasItem("item 1"));
         assertThat(multiselectComboBox.items, hasItem("item 2"));
         assertThat(multiselectComboBox.items, hasItem("item 3"));
+    }
+
+    @Test
+    public void shouldSetClearButtonVisible() {
+        // given
+        MultiselectComboBox<String> multiselectComboBox = new MultiselectComboBox<>();
+
+        Assert.assertFalse(multiselectComboBox.isClearButtonVisible());
+
+        // when
+        multiselectComboBox.setClearButtonVisible(true);
+
+        // then
+        assertThat(multiselectComboBox.isClearButtonVisible(), is(true));
+        assertThat(multiselectComboBox.getElement().getProperty("clearButtonVisible"), is("true"));
     }
 
     private static class TestMultiselectComboBox extends MultiselectComboBox<String> {
