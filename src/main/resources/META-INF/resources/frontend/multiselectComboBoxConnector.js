@@ -30,64 +30,66 @@ window.Vaadin.Flow.multiselectComboBoxConnector = {
     let cache = {};
     let lastFilter = '';
 
-    multiselectComboBox.$.comboBox.dataProvider = function (params, callback) {
-      if (params.pageSize != multiselectComboBox.$.comboBox.pageSize
-          && multiselectComboBox.pageSize != multiselectComboBox.$.comboBox.pageSize) {
+    customElements.whenDefined('multiselect-combo-box').then(() => {
+      multiselectComboBox.$.comboBox.dataProvider = function (params, callback) {
+        if (params.pageSize != multiselectComboBox.$.comboBox.pageSize
+            && multiselectComboBox.pageSize != multiselectComboBox.$.comboBox.pageSize) {
 
-        throw 'Invalid pageSize';
-      }
-
-      if (multiselectComboBox._clientSideFilter) {
-        // For clientside filter we first make sure we have all data which we also
-        // filter based on comboBox.filter. While later we only filter client side data.
-        if (cache[0]) {
-          performClientSideFilter(cache[0], callback);
-          return;
-        } else {
-          // If the client side filter is enabled then we need to first get all data
-          // and filter it on client side. Otherwise the next time the user
-          // inputs another filter, eg. continues to type, the local cache will be only
-          // that which was received for the first filter, which may not be the whole
-          // data from server (keep in mind that the client side filter is enabled only
-          // when the items count does not exceed one page).
-          params.filter = "";
+          throw 'Invalid pageSize';
         }
-      }
 
-      const filterChanged = params.filter !== lastFilter;
-      if (filterChanged) {
-        pageCallbacks = {};
-        cache = {};
-        lastFilter = params.filter;
-      }
+        if (multiselectComboBox._clientSideFilter) {
+          // For clientside filter we first make sure we have all data which we also
+          // filter based on comboBox.filter. While later we only filter client side data.
+          if (cache[0]) {
+            performClientSideFilter(cache[0], callback);
+            return;
+          } else {
+            // If the client side filter is enabled then we need to first get all data
+            // and filter it on client side. Otherwise the next time the user
+            // inputs another filter, eg. continues to type, the local cache will be only
+            // that which was received for the first filter, which may not be the whole
+            // data from server (keep in mind that the client side filter is enabled only
+            // when the items count does not exceed one page).
+            params.filter = "";
+          }
+        }
 
-      if (cache[params.page]) {
-        // This may happen after skipping pages by scrolling fast
-        commitPage(params.page, callback);
-      } else {
-        const upperLimit = params.pageSize * (params.page + 1);
-
+        const filterChanged = params.filter !== lastFilter;
         if (filterChanged) {
-          this._debouncer = Debouncer.debounce(
-            this._debouncer,
-            timeOut.after(500),
-            () => {
-              multiselectComboBox.$server.setRequestedRange(0, upperLimit, params.filter);
-              if (params.filter === '') {
-                // Fixes the case when the filter changes
-                // from '' to something else and back to ''
-                // within debounce timeout, and the
-                // DataCommunicator thinks it doesn't need to send data
-                multiselectComboBox.$server.resetDataCommunicator();
-              }
-            });
-        } else {
-          multiselectComboBox.$server.setRequestedRange(0, upperLimit, params.filter);
+          pageCallbacks = {};
+          cache = {};
+          lastFilter = params.filter;
         }
 
-        pageCallbacks[params.page] = callback;
-      }
-    };
+        if (cache[params.page]) {
+          // This may happen after skipping pages by scrolling fast
+          commitPage(params.page, callback);
+        } else {
+          const upperLimit = params.pageSize * (params.page + 1);
+
+          if (filterChanged) {
+            this._debouncer = Debouncer.debounce(
+                this._debouncer,
+                timeOut.after(500),
+                () => {
+                  multiselectComboBox.$server.setRequestedRange(0, upperLimit, params.filter);
+                  if (params.filter === '') {
+                    // Fixes the case when the filter changes
+                    // from '' to something else and back to ''
+                    // within debounce timeout, and the
+                    // DataCommunicator thinks it doesn't need to send data
+                    multiselectComboBox.$server.resetDataCommunicator();
+                  }
+                });
+          } else {
+            multiselectComboBox.$server.setRequestedRange(0, upperLimit, params.filter);
+          }
+
+          pageCallbacks[params.page] = callback;
+        }
+      };
+    });
 
     multiselectComboBox.$connector.filter = function (item, filter) {
       filter = filter ? filter.toString().toLowerCase() : '';
@@ -145,7 +147,9 @@ window.Vaadin.Flow.multiselectComboBoxConnector = {
         // filter is clientSide only (since it'll increase the height of
         // the popup at only the first user filter to this size, while the
         // filtered items count are less).
+        customElements.whenDefined('multiselect-combo-box').then(() => {
           multiselectComboBox.$.comboBox.size = newSize;
+        });
       }
     };
 
