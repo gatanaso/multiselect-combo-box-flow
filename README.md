@@ -13,12 +13,23 @@ Integration of of the [multiselect-combo-box](https://github.com/gatanaso/multis
 
 ## Install
 
-Add the `multiselect-combo-box-flow dependency` to your `pom.xml` file:
+Add the `multiselect-combo-box-flow dependency` to your `pom.xml`:
 ```xml
 <dependency>
    <groupId>org.vaadin.gatanaso</groupId>
    <artifactId>multiselect-combo-box-flow</artifactId>
    <version>2.2.1</version>
+</dependency>
+```
+
+To use the latest features of this component, the `vaadin-combo-box-flow` 
+dependency has to be at least `3.0.6` or newer. Therefore, add the following 
+to your pom.xml:
+```xml
+<dependency>
+   <groupId>com.vaadin</groupId>
+   <artifactId>vaadin-combo-box-flow</artifactId>
+   <version>[3.0.6,)</version>
 </dependency>
 ```
 
