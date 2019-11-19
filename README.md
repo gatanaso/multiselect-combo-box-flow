@@ -22,17 +22,6 @@ Add the `multiselect-combo-box-flow dependency` to your `pom.xml`:
 </dependency>
 ```
 
-To use the latest features of this component, the `vaadin-combo-box-flow` 
-dependency has to be at least `3.0.6` or newer. Therefore, add the following 
-to your pom.xml:
-```xml
-<dependency>
-   <groupId>com.vaadin</groupId>
-   <artifactId>vaadin-combo-box-flow</artifactId>
-   <version>[3.0.6,)</version>
-</dependency>
-```
-
 Add the `vaadin-addons` repository:
 ```xml
 <repository>

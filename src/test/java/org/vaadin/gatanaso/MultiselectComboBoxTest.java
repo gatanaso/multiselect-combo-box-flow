@@ -192,6 +192,7 @@ public class MultiselectComboBoxTest {
     public void shouldSetPageSize() {
         // given
         MultiselectComboBox<String> multiselectComboBox = new MultiselectComboBox<>();
+
         assertThat(multiselectComboBox.getPageSize(), is(50)); // default value
 
         // when
@@ -214,6 +215,18 @@ public class MultiselectComboBoxTest {
         // then
         assertThat(multiselectComboBox.isClearButtonVisible(), is(true));
         assertThat(multiselectComboBox.getElement().getProperty("clearButtonVisible"), is("true"));
+    }
+
+    @Test
+    public void shouldSetReadOnlyValueSeparator() {
+        // given
+        MultiselectComboBox<String> multiselectComboBox = new MultiselectComboBox<>();
+
+        // when
+        multiselectComboBox.setReadOnlyValueSeparator("***");
+
+        // then
+        assertThat(multiselectComboBox.getReadOnlyValueSeparator(), is("***"));
     }
 
     @Test
