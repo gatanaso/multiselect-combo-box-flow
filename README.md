@@ -13,7 +13,7 @@ Integration of of the [multiselect-combo-box](https://github.com/gatanaso/multis
 
 ## Install
 
-Add the `multiselect-combo-box-flow dependency` to your `pom.xml` file:
+Add the `multiselect-combo-box-flow dependency` to your `pom.xml`:
 ```xml
 <dependency>
    <groupId>org.vaadin.gatanaso</groupId>

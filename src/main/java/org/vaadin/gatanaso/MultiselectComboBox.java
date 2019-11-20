@@ -81,7 +81,7 @@ import elemental.json.JsonValue;
  * @author gatanaso
  */
 @Tag("multiselect-combo-box")
-@NpmPackage(value = "multiselect-combo-box", version = "2.1.0")
+@NpmPackage(value = "multiselect-combo-box", version = "2.2.0")
 @JsModule("multiselect-combo-box/src/multiselect-combo-box.js")
 @JavaScript("frontend://multiselectComboBoxConnector.js")
 @JsModule("./multiselectComboBoxConnector-es6.js")
@@ -445,6 +445,25 @@ public class MultiselectComboBox<T>
      */
     public void setClearButtonVisible(boolean clearButtonVisible) {
         getElement().setProperty("clearButtonVisible", clearButtonVisible);
+    }
+
+    /**
+     * Gets the value of the configured value separator when in read only mode.
+     *
+     * @return the read only value separator.
+     */
+    public String getReadOnlyValueSeparator() {
+        return getElement().getProperty("readonlyValueSeparator");
+    }
+
+    /**
+     * Sets the value separator when in read only mode.
+     *
+     * @param readonlyValueSeparator
+     *            the separator value to set
+     */
+    public void setReadOnlyValueSeparator(String readonlyValueSeparator) {
+        getElement().setProperty("readonlyValueSeparator", readonlyValueSeparator == null ? "" : readonlyValueSeparator);
     }
 
     private void setItemValuePath(String itemValuePath) {

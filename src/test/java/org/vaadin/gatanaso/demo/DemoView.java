@@ -42,6 +42,7 @@ public class DemoView extends VerticalLayout {
         MultiselectComboBox<String> multiselectComboBox = new MultiselectComboBox();
         multiselectComboBox.setLabel("Multiselect combo box with string items");
         multiselectComboBox.setPlaceholder("Add");
+        multiselectComboBox.setWidth("100%");
         multiselectComboBox.setItems("Item 1", "Item 2", "Item 3", "Item 4");
         multiselectComboBox.addSelectionListener(
                 event -> Notification.show(event.toString()));
@@ -58,6 +59,7 @@ public class DemoView extends VerticalLayout {
         MultiselectComboBox<User> multiselectComboBox = new MultiselectComboBox();
         multiselectComboBox.setLabel("Multiselect combo box with object items");
         multiselectComboBox.setPlaceholder("Add");
+        multiselectComboBox.setWidth("100%");
         List<User> data = Arrays.asList(
                 new User("Leanne Graham", "leanne", "leanne@demo.dev"),
                 new User("Ervin Howell", "ervin", "ervin@demo.dev"),
@@ -79,6 +81,7 @@ public class DemoView extends VerticalLayout {
         multiselectComboBox.setLabel(
                 "Multiselect combo box with object items and custom item label generator");
         multiselectComboBox.setPlaceholder("Add");
+        multiselectComboBox.setWidth("100%");
         List<User> data = Arrays.asList(
                 new User("Leanne Graham", "leanne", "leanne@demo.dev"),
                 new User("Ervin Howell", "ervin", "ervin@demo.dev"),
@@ -100,6 +103,7 @@ public class DemoView extends VerticalLayout {
         MultiselectComboBox<String> multiselectComboBox = new MultiselectComboBox();
         multiselectComboBox.setLabel("Required multiselect combo box");
         multiselectComboBox.setPlaceholder("Add");
+        multiselectComboBox.setWidth("100%");
         multiselectComboBox.setRequired(true);
         multiselectComboBox.setErrorMessage("The field is mandatory");
         multiselectComboBox.setItems("Item 1", "Item 2", "Item 3", "Item 4");
@@ -118,6 +122,7 @@ public class DemoView extends VerticalLayout {
         MultiselectComboBox<String> multiselectComboBox = new MultiselectComboBox();
         multiselectComboBox.setLabel("Multiselect combo box in compact mode");
         multiselectComboBox.setPlaceholder("Add");
+        multiselectComboBox.setWidth("100%");
         multiselectComboBox.setItems("Item 1", "Item 2", "Item 3", "Item 4");
         multiselectComboBox.addSelectionListener(
                 event -> Notification.show(event.toString()));
@@ -137,6 +142,7 @@ public class DemoView extends VerticalLayout {
         multiselectComboBox.setLabel(
                 "Multiselect combo box with ordered selected items list");
         multiselectComboBox.setPlaceholder("Add");
+        multiselectComboBox.setWidth("100%");
         multiselectComboBox.setItems("Item 1", "Item 2", "Item 3", "Item 4");
         multiselectComboBox.addSelectionListener(
                 event -> Notification.show(event.toString()));
@@ -155,6 +161,7 @@ public class DemoView extends VerticalLayout {
         MultiselectComboBox<String> multiselectComboBox = new MultiselectComboBox();
         multiselectComboBox.setLabel("Multiselect with lazy loading");
         multiselectComboBox.setPlaceholder("Add");
+        multiselectComboBox.setWidth("100%");
 
         List<String> items =IntStream.range(1, 10000).mapToObj(num -> "Item " + num).collect(Collectors.toList());
         multiselectComboBox.setItems(items);
@@ -174,6 +181,7 @@ public class DemoView extends VerticalLayout {
         MultiselectComboBox<String> multiselectComboBox = new MultiselectComboBox();
         multiselectComboBox.setLabel("Multiselect combo box with `clear-button-visible`");
         multiselectComboBox.setPlaceholder("Add");
+        multiselectComboBox.setWidth("100%");
         multiselectComboBox.setItems("Item 1", "Item 2", "Item 3", "Item 4");
         multiselectComboBox.addSelectionListener(
                 event -> Notification.show(event.toString()));
