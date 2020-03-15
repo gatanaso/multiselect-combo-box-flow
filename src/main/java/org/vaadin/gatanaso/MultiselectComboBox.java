@@ -29,7 +29,6 @@ import com.vaadin.flow.data.provider.ArrayUpdater;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
 import com.vaadin.flow.data.provider.DataChangeEvent;
-import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
@@ -81,7 +80,7 @@ import elemental.json.JsonValue;
  * @author gatanaso
  */
 @Tag("multiselect-combo-box")
-@NpmPackage(value = "multiselect-combo-box", version = "2.2.0")
+@NpmPackage(value = "multiselect-combo-box", version = "2.3.1")
 @JsModule("multiselect-combo-box/src/multiselect-combo-box.js")
 @JavaScript("frontend://multiselectComboBoxConnector.js")
 @JsModule("./multiselectComboBoxConnector-es6.js")
@@ -111,7 +110,7 @@ public class MultiselectComboBox<T>
         }
     };
 
-    private DataCommunicator<T> dataCommunicator;
+    private MultiselectComboBoxDataCommunicator<T> dataCommunicator;
     private ItemLabelGenerator<T> itemLabelGenerator = String::valueOf;
 
     private SerializableConsumer<String> filterSlot = filter -> {
@@ -217,9 +216,13 @@ public class MultiselectComboBox<T>
             MultiselectComboBox<T> multiselectComboBox,
             JsonArray presentation) {
 
-        if (presentation == null
-                || multiselectComboBox.dataCommunicator == null) {
+        if (presentation == null || multiselectComboBox.dataCommunicator == null) {
             return multiselectComboBox.getEmptyValue();
+        }
+
+        if (multiselectComboBox.getValue() != null) {
+            // keep existing value items in keyMapper
+            multiselectComboBox.getValue().forEach(item -> multiselectComboBox.getKeyMapper().key(item));
         }
 
         Set<T> set = new HashSet<>();
@@ -779,7 +782,7 @@ public class MultiselectComboBox<T>
         }
 
         if (dataCommunicator == null) {
-            dataCommunicator = new DataCommunicator<>(dataGenerator,
+            dataCommunicator = new MultiselectComboBoxDataCommunicator<>(dataGenerator,
                     arrayUpdater, data -> getElement()
                             .callJsFunction("$connector.updateData", data),
                     getElement().getNode());
