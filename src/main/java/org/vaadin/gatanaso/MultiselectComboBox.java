@@ -13,6 +13,10 @@ import java.util.stream.Stream;
 
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.ClientCallable;
+import com.vaadin.flow.component.ComponentEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.DomEvent;
+import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
@@ -80,7 +84,7 @@ import elemental.json.JsonValue;
  * @author gatanaso
  */
 @Tag("multiselect-combo-box")
-@NpmPackage(value = "multiselect-combo-box", version = "2.3.1")
+@NpmPackage(value = "multiselect-combo-box", version = "2.4.0")
 @JsModule("multiselect-combo-box/src/multiselect-combo-box.js")
 @JavaScript("frontend://multiselectComboBoxConnector.js")
 @JsModule("./multiselectComboBoxConnector-es6.js")
@@ -112,6 +116,8 @@ public class MultiselectComboBox<T>
 
     private MultiselectComboBoxDataCommunicator<T> dataCommunicator;
     private ItemLabelGenerator<T> itemLabelGenerator = String::valueOf;
+
+    private int customValuesListenersCount;
 
     private SerializableConsumer<String> filterSlot = filter -> {
         // Just ignore when setDataProvider has not been called
@@ -561,6 +567,44 @@ public class MultiselectComboBox<T>
     }
 
     /**
+     * Enables or disables the component firing events for custom string input.
+     * <p>
+     * When enabled, a {@link CustomValuesSetEvent} will be fired when the user
+     * inputs a string value that does not match any existing items and commits
+     * it eg. by blurring or pressing the enter-key.
+     * <p>
+     * Note that MultiselectComboBox doesn't do anything with the custom value string
+     * automatically. Use the
+     * {@link #addCustomValuesSetListener(ComponentEventListener)} method to
+     * determine how the custom value should be handled. For example, when the
+     * MultiselectComboBox has {@code String} as the value type, you can add a listener
+     * which sets the custom string as on of the values of the MultiselectComboBox.
+     *
+     * @param allowCustomValues
+     *            {@code true} to enable custom values set events, {@code false}
+     *            to disable them
+     *
+     * @see #addCustomValuesSetListener(ComponentEventListener)
+     */
+    public void setAllowCustomValues(boolean allowCustomValues) {
+        getElement().setProperty("allowCustomValues", allowCustomValues);
+    }
+
+    /**
+     * If {@code true}, the user can input string values that do not match to
+     * any existing item labels, which will fire a {@link CustomValuesSetEvent}.
+     *
+     * @return {@code true} if the component fires custom value set events,
+     *         {@code false} otherwise
+     *
+     * @see #setAllowCustomValues(boolean)
+     * @see #addCustomValuesSetListener(ComponentEventListener)
+     */
+    public boolean isAllowCustomValues() {
+        return getElement().getProperty("allowCustomValues", false);
+    }
+
+    /**
      * Gets the data provider used by this {@link MultiselectComboBox}.
      *
      * @return the data provider, not {@code null}
@@ -631,6 +675,38 @@ public class MultiselectComboBox<T>
         return addValueChangeListener(event -> listener
                 .selectionChange(new MultiSelectionEvent<>(this, this,
                         event.getOldValue(), event.isFromClient())));
+    }
+
+    /**
+     * Adds a listener for the event which is fired when user inputs a string
+     * value that does not match any existing items and commits it eg. by
+     * blurring or pressing the enter-key.
+     * <p>
+     * Note that MultiselectComboBox doesn't do anything with the custom value string
+     * automatically. Use this method to determine how the custom value should
+     * be handled. For example, when the MultiselectComboBox has {@code String} as the
+     * value type, you can add a listener which sets the custom string as on of the
+     * values of the MultiselectComboBox.
+     * <p>
+     * As a side effect, this makes the MultiselectComboBox allow custom values. If you
+     * want to disable the firing of custom value set events once the listener
+     * is added, please disable it explicitly via the
+     * {@link #setAllowCustomValues(boolean)} method.
+     * <p>
+     * The custom value becomes disallowed automatically once the last custom
+     * value set listener is removed.
+     *
+     * @param listener
+     *            the listener to be notified when a new value is filled
+     * @return a {@link Registration} for removing the event listener
+     *
+     * @see #setAllowCustomValues(boolean)
+     */
+    public Registration addCustomValuesSetListener(ComponentEventListener<CustomValuesSetEvent<MultiselectComboBox<T>>> listener) {
+        setAllowCustomValues(true);
+        customValuesListenersCount++;
+        Registration registration = addListener(CustomValuesSetEvent.class, (ComponentEventListener) listener);
+        return new CustomValuesRegistration(registration);
     }
 
     private DataKeyMapper<T> getKeyMapper() {
@@ -963,6 +1039,42 @@ public class MultiselectComboBox<T>
          * @return stream of items
          */
         public Stream<T> fetchItems(String filter, int offset, int limit);
+    }
+
+    @DomEvent("custom-values-set")
+    public static class CustomValuesSetEvent<T> extends ComponentEvent<MultiselectComboBox<T>> {
+        private final String detail;
+
+        public CustomValuesSetEvent(MultiselectComboBox<T> source, boolean fromClient,
+            @EventData("event.detail") String detail) {
+
+            super(source, fromClient);
+            this.detail = detail;
+        }
+
+        public String getDetail() {
+            return detail;
+        }
+    }
+
+    private class CustomValuesRegistration implements Registration {
+        private Registration delegate;
+
+        private CustomValuesRegistration(Registration delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void remove() {
+            if (delegate != null) {
+                delegate.remove();
+                customValuesListenersCount--;
+                if (customValuesListenersCount == 0) {
+                    setAllowCustomValues(false);
+                }
+                delegate = null;
+            }
+        }
     }
 
     private final class UpdateQueue implements ArrayUpdater.Update {
