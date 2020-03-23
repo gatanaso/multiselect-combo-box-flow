@@ -12,6 +12,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.router.Route;
 
 @Route("")
@@ -30,6 +31,7 @@ public class DemoView extends VerticalLayout {
         addOrderedDemo();
         addLazyLoadingDemo();
         addClearButtonVisibleDemo();
+        addAllowCustomValuesDemo();
     }
 
     private void addTitle() {
@@ -192,6 +194,31 @@ public class DemoView extends VerticalLayout {
         getValueBtn.addClickListener(
                 event -> multiselectComboBoxValueChangeHandler(
                         multiselectComboBox));
+
+        add(buildDemoContainer(multiselectComboBox, getValueBtn));
+    }
+
+    private void addAllowCustomValuesDemo() {
+        MultiselectComboBox<String> multiselectComboBox = new MultiselectComboBox();
+        multiselectComboBox.setLabel("Allow custom values");
+        multiselectComboBox.setPlaceholder("Select existing or input custom value");
+        multiselectComboBox.setWidth("100%");
+        List<String> items = Arrays.asList("Java", "Go", "Python", "C#");
+        multiselectComboBox.setItems(items);
+
+        multiselectComboBox.addCustomValuesSetListener(e -> {
+            Set<String> existingSelected = multiselectComboBox.getValue().stream().collect(Collectors.toSet());
+            existingSelected.add(e.getDetail());
+            List<String> updatedItems = multiselectComboBox.getDataProvider().fetch(new Query<>()).collect(Collectors.toList());
+            updatedItems.add(e.getDetail());
+            multiselectComboBox.setItems(updatedItems);
+            multiselectComboBox.setValue(existingSelected);
+        });
+
+        Button getValueBtn = new Button("Get value");
+        getValueBtn.addClickListener(
+            event -> multiselectComboBoxValueChangeHandler(
+                multiselectComboBox));
 
         add(buildDemoContainer(multiselectComboBox, getValueBtn));
     }

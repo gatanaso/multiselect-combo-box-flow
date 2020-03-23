@@ -230,6 +230,21 @@ public class MultiselectComboBoxTest {
     }
 
     @Test
+    public void shouldSetAllowCustomValues() {
+        // given
+        MultiselectComboBox<String> multiselectComboBox = new MultiselectComboBox<>();
+
+        Assert.assertFalse(multiselectComboBox.isAllowCustomValues());
+
+        // when
+        multiselectComboBox.setAllowCustomValues(true);
+
+        // then
+        assertThat(multiselectComboBox.isAllowCustomValues(), is(true));
+        assertThat(multiselectComboBox.getElement().getProperty("allowCustomValues"), is("true"));
+    }
+
+    @Test
     public void shouldUpdateDataProviderAndResetValueToEmpty() {
         // given
         MultiselectComboBox<Object> multiselectComboBox = new MultiselectComboBox<>();
