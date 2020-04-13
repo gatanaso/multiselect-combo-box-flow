@@ -110,7 +110,8 @@ multiselectComboBox.setItemLabelGenerator(User::getEmail)
 ```
 
 ## Version information
-* 2.x.x - the version for Vaadin 14
+* 3.x.x - the version for Vaadin 15
+* 2.x.x - the version for Vaadin 14 (LTS)
 * 1.x.x. - the version for Vaadin 13 and Vaadin 12
 
 ### Vaadin 12 support
@@ -129,7 +130,8 @@ Optionally, to always use the latest version, a range can be specified as follow
 ```
 
 ## Branch information
-* `master` the latest version for Vaadin 14
+* `master` the latest version for Vaadin 15
+* `V14` the version for Vaadin 14 (LTS)
 * `V13` the version for Vaadin 13 and Vaadin 12
 
 ## Running demos locally
