@@ -18,7 +18,7 @@ Add the `multiselect-combo-box-flow dependency` to your `pom.xml`:
 <dependency>
    <groupId>org.vaadin.gatanaso</groupId>
    <artifactId>multiselect-combo-box-flow</artifactId>
-   <version>2.4.0</version>
+   <version>2.4.1</version>
 </dependency>
 ```
 
