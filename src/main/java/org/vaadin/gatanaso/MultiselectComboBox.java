@@ -25,7 +25,6 @@ import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.data.binder.HasFilterableDataProvider;
@@ -86,8 +85,7 @@ import elemental.json.JsonValue;
 @Tag("multiselect-combo-box")
 @NpmPackage(value = "multiselect-combo-box", version = "2.4.1")
 @JsModule("multiselect-combo-box/src/multiselect-combo-box.js")
-@JavaScript("frontend://multiselectComboBoxConnector.js")
-@JsModule("./multiselectComboBoxConnector-es6.js")
+@JsModule("./multiselectComboBoxConnector.js")
 public class MultiselectComboBox<T>
         extends AbstractSinglePropertyField<MultiselectComboBox<T>, Set<T>>
         implements HasStyle, HasSize, HasValidation, HasEnabled,
