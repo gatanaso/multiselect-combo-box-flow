@@ -30,7 +30,7 @@ window.Vaadin.Flow.multiselectComboBoxConnector = {
     let cache = {};
     let lastFilter = '';
 
-    customElements.whenDefined('multiselect-combo-box').then(() => {
+    multiselectComboBox.$connector.initDataConnector = function() {
       multiselectComboBox.$.comboBox.dataProvider = function (params, callback) {
         if (params.pageSize != multiselectComboBox.$.comboBox.pageSize
             && multiselectComboBox.pageSize != multiselectComboBox.$.comboBox.pageSize) {
@@ -89,7 +89,7 @@ window.Vaadin.Flow.multiselectComboBoxConnector = {
           pageCallbacks[params.page] = callback;
         }
       };
-    });
+    };
 
     multiselectComboBox.$connector.filter = function (item, filter) {
       filter = filter ? filter.toString().toLowerCase() : '';
