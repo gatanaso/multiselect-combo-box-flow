@@ -1,17 +1,20 @@
 package org.vaadin.gatanaso;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.shared.Registration;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
@@ -22,6 +25,52 @@ import static org.hamcrest.Matchers.is;
  * Tests for the {@link MultiselectComboBox}.
  */
 public class MultiselectComboBoxTest {
+
+    @Test
+    public void shouldInstantiateWithLabel() {
+        // given
+        MultiselectComboBox<String> multiselectComboBox;
+        String label = "Label";
+
+        // when
+        multiselectComboBox = new MultiselectComboBox<>(label);
+
+        // then
+        assertThat(multiselectComboBox.getLabel(), is(label));
+    }
+
+    @Test
+    public void shouldInstantiateWithLabelAndCollectionOfItems() {
+        // given
+        TestMultiselectComboBox<String> multiselectComboBox;
+        String label = "Label";
+        List<String> items = Arrays.asList("Item 1", "Item 2");
+
+        // when
+        multiselectComboBox = new TestMultiselectComboBox<String>(label, items);
+
+        // then
+        assertThat(multiselectComboBox.getLabel(), is(label));
+        assertThat(multiselectComboBox.items, hasSize(2));
+        assertThat(multiselectComboBox.items, hasItem("Item 1"));
+        assertThat(multiselectComboBox.items, hasItem("Item 2"));
+    }
+
+    @Test
+    public void shouldInstantiateWithLabelAndItems() {
+        // given
+        TestMultiselectComboBox<String> multiselectComboBox;
+        String label = "Label";
+
+        // when
+        multiselectComboBox = new TestMultiselectComboBox<String>(label, "Item 1", "Item 2");
+
+        // then
+        assertThat(multiselectComboBox.getLabel(), is(label));
+        assertThat(multiselectComboBox.items, hasSize(2));
+        assertThat(multiselectComboBox.items, hasItem("Item 1"));
+        assertThat(multiselectComboBox.items, hasItem("Item 2"));
+    }
 
     @Test
     public void shouldVerifyItemLabelPath() {
@@ -176,7 +225,7 @@ public class MultiselectComboBoxTest {
     @Test
     public void shouldSetItems() {
         // given
-        TestMultiselectComboBox multiselectComboBox = new TestMultiselectComboBox();
+        TestMultiselectComboBox<String> multiselectComboBox = new TestMultiselectComboBox();
 
         // when
         multiselectComboBox.setItems(Arrays.asList("item 1", "item 2", "item 3"));
@@ -200,6 +249,15 @@ public class MultiselectComboBoxTest {
 
         // then
         assertThat(multiselectComboBox.getPageSize(), is(10));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldThrowExceptionWhenSettingInvalidPageSize() {
+        // given
+        MultiselectComboBox<String> multiselectComboBox = new MultiselectComboBox<>();
+
+        // when & then
+        multiselectComboBox.setPageSize(0);
     }
 
     @Test
@@ -262,11 +320,128 @@ public class MultiselectComboBoxTest {
         assertThat(multiselectComboBox.getValue(), hasSize(0)); // value is reset to empty
     }
 
-    private static class TestMultiselectComboBox extends MultiselectComboBox<String> {
-        private List<String> items = new ArrayList<>();
+    @Test(expected = NullPointerException.class)
+    public void shouldThrowExceptionWhenSettingNullDataProvider() {
+        // given
+        MultiselectComboBox<Object> multiselectComboBox = new MultiselectComboBox<>();
+        DataProvider<Object, String> dataProvider = null;
+
+        // when
+        multiselectComboBox.setDataProvider(dataProvider);
+
+        // then, expect exception
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void shouldThrowExceptionWhenSettingNullItemLabelGenerator() {
+        // given
+        MultiselectComboBox<Object> multiselectComboBox = new MultiselectComboBox<>();
+
+        // when
+        multiselectComboBox.setItemLabelGenerator(null);
+
+        // then, expect exception
+    }
+
+    @Test
+    public void shouldNotifyValueChangeListener() {
+        // given
+        MultiselectComboBox<String> multiselectComboBox = new MultiselectComboBox<>();
+        multiselectComboBox.setItems("Item 1", "Item 2", "Item 3");
+
+        AtomicReference<Set<String>> selected = new AtomicReference<>();
+        multiselectComboBox.addValueChangeListener(event -> selected.set(multiselectComboBox.getValue()));
+
+        // when
+        Set<String> value = new LinkedHashSet<>(Arrays.asList("Item 1, Item 2"));
+        multiselectComboBox.setValue(value);
+
+        // then
+        assertThat(selected.get(), is(value));
+    }
+
+    @Test
+    public void shouldSetEnabled() {
+        // given
+        MultiselectComboBox<String> multiselectComboBox = new MultiselectComboBox<>();
+
+        // when & then
+        multiselectComboBox.setEnabled(true);
+        assertThat(multiselectComboBox.isEnabled(), is(true));
+
+        multiselectComboBox.setEnabled(false);
+        assertThat(multiselectComboBox.isEnabled(), is(false));
+    }
+
+    @Test
+    public void shouldSetCustomValuesAllowedFlagWhenEventListenerIsRegistered() {
+        // given
+        MultiselectComboBox<String> multiselectComboBox = new MultiselectComboBox<>();
+
+        // when
+        multiselectComboBox.addCustomValuesSetListener(event -> {
+           // no op
+        });
+
+        // then
+        assertThat(multiselectComboBox.isAllowCustomValues(), is(true));
+    }
+
+    @Test
+    public void shouldRemoveCustomValuesAllowedFlagWhenEventListenerIsRemoved() {
+        // given
+        MultiselectComboBox<String> multiselectComboBox = new MultiselectComboBox<>();
+
+        Registration registration = multiselectComboBox.addCustomValuesSetListener(event -> {
+            // no op
+        });
+
+        // when
+        registration.remove();
+
+        // then
+        assertThat(multiselectComboBox.isAllowCustomValues(), is(false));
+    }
+
+    @Test
+    public void shouldRemoveCustomValuesAllowedFlagWhenEventAllListenerAreRemoved() {
+        // given
+        MultiselectComboBox<String> multiselectComboBox = new MultiselectComboBox<>();
+
+        Registration registration1 = multiselectComboBox.addCustomValuesSetListener(event -> {
+            // no op
+        });
+        Registration registration2 = multiselectComboBox.addCustomValuesSetListener(event -> {
+            // no op
+        });
+
+        assertThat(multiselectComboBox.isAllowCustomValues(), is(true));
+
+        // when
+        registration1.remove();
+        registration2.remove();
+
+        // then
+        assertThat(multiselectComboBox.isAllowCustomValues(), is(false));
+    }
+
+    private static class TestMultiselectComboBox<T> extends MultiselectComboBox<T> {
+        private List<T> items;
+
+        public TestMultiselectComboBox() {
+            super();
+        }
+
+        public TestMultiselectComboBox(String label, Collection<T> items) {
+            super(label, items);
+        }
+
+        public TestMultiselectComboBox(String label, T... items) {
+            super(label, items);
+        }
 
         @Override
-        public void setDataProvider(ListDataProvider<String> listDataProvider) {
+        public void setDataProvider(ListDataProvider<T> listDataProvider) {
             super.setDataProvider(listDataProvider);
             items = listDataProvider.fetch(new Query<>())
                     .collect(Collectors.toList());
