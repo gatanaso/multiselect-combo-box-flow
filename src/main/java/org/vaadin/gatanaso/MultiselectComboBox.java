@@ -37,9 +37,12 @@ import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.data.renderer.Renderer;
+import com.vaadin.flow.data.renderer.Rendering;
 import com.vaadin.flow.data.selection.MultiSelect;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
 import com.vaadin.flow.data.selection.MultiSelectionListener;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableBiPredicate;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
@@ -116,6 +119,11 @@ public class MultiselectComboBox<T>
 
     private MultiselectComboBoxDataCommunicator<T> dataCommunicator;
     private ItemLabelGenerator<T> itemLabelGenerator = String::valueOf;
+    private Registration dataGeneratorRegistration;
+
+    private Renderer<T> renderer;
+    private boolean renderScheduled;
+    private Element template;
 
     private int customValuesListenersCount;
 
@@ -275,6 +283,31 @@ public class MultiselectComboBox<T>
         }
         JsonArray selectedItems = modelToPresentation(this, value);
         getElement().setPropertyJson("selectedItems", selectedItems);
+    }
+
+    /**
+     * Sets the TemplateRenderer responsible to render the individual items in
+     * the list of possible choices of the MultiselectComboBox. It doesn't affect how the
+     * selected item is rendered - that can be configured by using
+     * {@link #setItemLabelGenerator(ItemLabelGenerator)}.
+     *
+     * @param renderer
+     *            a renderer for the items in the selection list of the
+     *            MultiselectComboBox, not <code>null</code>
+     *
+     * Note that filtering of the MultiselectComboBox is not affected by the renderer that
+     * is set here. Filtering is done on the original values and can be affected
+     * by {@link #setItemLabelGenerator(ItemLabelGenerator)}.
+     */
+    public void setRenderer(Renderer<T> renderer) {
+        Objects.requireNonNull(renderer, "The renderer must not be null");
+        this.renderer = renderer;
+
+        if (template == null) {
+            template = new Element("template");
+            getElement().appendChild(template);
+        }
+        scheduleRender();
     }
 
     /**
@@ -713,6 +746,29 @@ public class MultiselectComboBox<T>
         return dataCommunicator.getKeyMapper();
     }
 
+    private void scheduleRender() {
+        if (renderScheduled || dataCommunicator == null || renderer == null) {
+            return;
+        }
+        renderScheduled = true;
+
+        runBeforeClientResponse(ui -> {
+            if (dataGeneratorRegistration != null) {
+                dataGeneratorRegistration.remove();
+                dataGeneratorRegistration = null;
+            }
+
+            Rendering<T> rendering = renderer.render(getElement(), dataCommunicator.getKeyMapper(), template);
+
+            if (rendering.getDataGenerator().isPresent()) {
+                dataGeneratorRegistration = dataGenerator
+                    .addDataGenerator(rendering.getDataGenerator().get());
+            }
+
+            reset();
+        });
+    }
+
     @ClientCallable
     private void confirmUpdate(int id) {
         dataCommunicator.confirmUpdate(id);
@@ -870,6 +926,7 @@ public class MultiselectComboBox<T>
                     getElement().getNode());
         }
 
+        scheduleRender();
         setValue(null);
 
         SerializableFunction<String, C> convertOrNull = filterText -> {
