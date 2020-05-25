@@ -343,6 +343,17 @@ public class MultiselectComboBoxTest {
         // then, expect exception
     }
 
+    @Test(expected = NullPointerException.class)
+    public void shouldThrowExceptionWhenSettingNullRenderer() {
+        // given
+        MultiselectComboBox<Object> multiselectComboBox = new MultiselectComboBox<>();
+
+        // when
+        multiselectComboBox.setRenderer(null);
+
+        // then, expect exception
+    }
+
     @Test
     public void shouldNotifyValueChangeListener() {
         // given
