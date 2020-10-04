@@ -88,7 +88,7 @@ import elemental.json.JsonValue;
  * @author gatanaso
  */
 @Tag("multiselect-combo-box")
-@NpmPackage(value = "multiselect-combo-box", version = "2.5.0-beta.2")
+@NpmPackage(value = "multiselect-combo-box", version = "2.5.0-beta.3")
 @JsModule("multiselect-combo-box/src/multiselect-combo-box.js")
 @JavaScript("frontend://multiselectComboBoxConnector.js")
 @JsModule("./multiselectComboBoxConnector-es6.js")
@@ -792,7 +792,7 @@ public class MultiselectComboBox<T>
     }
 
     @ClientCallable
-    private void initDataConnector() {
+    private void notifyReady() {
         // init data connector when shadow-dom is ready
         getElement().executeJs("$0.$connector.initDataConnector()");
     }
