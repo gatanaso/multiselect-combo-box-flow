@@ -33,6 +33,7 @@ public class DemoView extends VerticalLayout {
         addObjectDemoWithLabelGenerator();
         addRequiredDemo();
         addCompactModeDemo();
+        addCompactModeLabelGeneratorDemo();
         addOrderedDemo();
         addLazyLoadingDemo();
         addClearButtonVisibleDemo();
@@ -49,7 +50,7 @@ public class DemoView extends VerticalLayout {
 
     private void addSimpleStringDemo() {
         MultiselectComboBox<String> multiselectComboBox = new MultiselectComboBox();
-        multiselectComboBox.setLabel("Multiselect combo box with string items");
+        multiselectComboBox.setLabel("MultiselectComboBox with string items");
         multiselectComboBox.setPlaceholder("Add");
         multiselectComboBox.setWidth("100%");
         multiselectComboBox.setItems("Item 1", "Item 2", "Item 3", "Item 4");
@@ -66,7 +67,7 @@ public class DemoView extends VerticalLayout {
 
     private void addObjectDemo() {
         MultiselectComboBox<User> multiselectComboBox = new MultiselectComboBox();
-        multiselectComboBox.setLabel("Multiselect combo box with object items");
+        multiselectComboBox.setLabel("MultiselectComboBox with object items");
         multiselectComboBox.setPlaceholder("Add");
         multiselectComboBox.setWidth("100%");
         List<User> data = Arrays.asList(
@@ -87,8 +88,7 @@ public class DemoView extends VerticalLayout {
 
     private void addObjectDemoWithLabelGenerator() {
         MultiselectComboBox<User> multiselectComboBox = new MultiselectComboBox();
-        multiselectComboBox.setLabel(
-                "Multiselect combo box with object items and custom item label generator");
+        multiselectComboBox.setLabel("MultiselectComboBox with object items and custom item label generator");
         multiselectComboBox.setPlaceholder("Add");
         multiselectComboBox.setWidth("100%");
         List<User> data = Arrays.asList(
@@ -110,7 +110,7 @@ public class DemoView extends VerticalLayout {
 
     private void addRequiredDemo() {
         MultiselectComboBox<String> multiselectComboBox = new MultiselectComboBox();
-        multiselectComboBox.setLabel("Required multiselect combo box");
+        multiselectComboBox.setLabel("Required MultiselectComboBox");
         multiselectComboBox.setPlaceholder("Add");
         multiselectComboBox.setWidth("100%");
         multiselectComboBox.setRequired(true);
@@ -129,7 +129,7 @@ public class DemoView extends VerticalLayout {
 
     private void addCompactModeDemo() {
         MultiselectComboBox<String> multiselectComboBox = new MultiselectComboBox();
-        multiselectComboBox.setLabel("Multiselect combo box in compact mode");
+        multiselectComboBox.setLabel("MultiselectComboBox in compact mode");
         multiselectComboBox.setPlaceholder("Add");
         multiselectComboBox.setWidth("100%");
         multiselectComboBox.setItems("Item 1", "Item 2", "Item 3", "Item 4");
@@ -146,10 +146,37 @@ public class DemoView extends VerticalLayout {
         add(buildDemoContainer(multiselectComboBox, getValueBtn));
     }
 
+    private void addCompactModeLabelGeneratorDemo() {
+        MultiselectComboBox<String> multiselectComboBox = new MultiselectComboBox();
+        multiselectComboBox.setLabel("MultiselectComboBox with compact mode label generator");
+        multiselectComboBox.setPlaceholder("Add");
+        multiselectComboBox.setWidth("100%");
+        multiselectComboBox.setItems("Item 1", "Item 2", "Item 3", "Item 4");
+        multiselectComboBox.addSelectionListener(
+            event -> Notification.show(event.toString()));
+
+        multiselectComboBox.setCompactMode(true);
+        multiselectComboBox.setCompactModeLabelGenerator((items) -> {
+            if (items.size() == 0) {
+                return "Choose items...";
+            } else if (items.size() == 1) {
+                return "One item selected";
+            } else {
+                return items.size() + " Items selected";
+            }
+        });
+
+        Button getValueBtn = new Button("Get value");
+        getValueBtn.addClickListener(
+            event -> multiselectComboBoxValueChangeHandler(
+                multiselectComboBox));
+
+        add(buildDemoContainer(multiselectComboBox, getValueBtn));
+    }
+
     private void addOrderedDemo() {
         MultiselectComboBox<String> multiselectComboBox = new MultiselectComboBox();
-        multiselectComboBox.setLabel(
-                "Multiselect combo box with ordered selected items list");
+        multiselectComboBox.setLabel("MultiselectComboBox with ordered selected items list");
         multiselectComboBox.setPlaceholder("Add");
         multiselectComboBox.setWidth("100%");
         multiselectComboBox.setItems("Item 1", "Item 2", "Item 3", "Item 4");
@@ -168,7 +195,7 @@ public class DemoView extends VerticalLayout {
 
     private void addLazyLoadingDemo() {
         MultiselectComboBox<String> multiselectComboBox = new MultiselectComboBox();
-        multiselectComboBox.setLabel("Multiselect with lazy loading");
+        multiselectComboBox.setLabel("MultiselectComboBox with lazy loading");
         multiselectComboBox.setPlaceholder("Add");
         multiselectComboBox.setWidth("100%");
 
@@ -188,7 +215,7 @@ public class DemoView extends VerticalLayout {
 
     private void addClearButtonVisibleDemo() {
         MultiselectComboBox<String> multiselectComboBox = new MultiselectComboBox();
-        multiselectComboBox.setLabel("Multiselect combo box with `clear-button-visible`");
+        multiselectComboBox.setLabel("MultiselectComboBox with `clear-button-visible`");
         multiselectComboBox.setPlaceholder("Add");
         multiselectComboBox.setWidth("100%");
         multiselectComboBox.setItems("Item 1", "Item 2", "Item 3", "Item 4");
@@ -207,7 +234,7 @@ public class DemoView extends VerticalLayout {
 
     private void addAllowCustomValuesDemo() {
         MultiselectComboBox<String> multiselectComboBox = new MultiselectComboBox();
-        multiselectComboBox.setLabel("Allow custom values");
+        multiselectComboBox.setLabel("MultiselectComboBox which allows custom values");
         multiselectComboBox.setPlaceholder("Select existing or input custom value");
         multiselectComboBox.setWidth("100%");
         List<String> items = Arrays.asList("Java", "Go", "Python", "C#");
@@ -232,8 +259,7 @@ public class DemoView extends VerticalLayout {
 
     public void addTemplateRendererDemo() {
         MultiselectComboBox<User> multiselectComboBox = new MultiselectComboBox();
-        multiselectComboBox.setLabel(
-            "Multiselect combo box with TemplateRenderer");
+        multiselectComboBox.setLabel("MultiselectComboBox with TemplateRenderer");
         multiselectComboBox.setPlaceholder("Add");
         multiselectComboBox.setWidth("100%");
         List<User> data = Arrays.asList(
@@ -261,8 +287,7 @@ public class DemoView extends VerticalLayout {
 
     public void addComponentRendererDemo() {
         MultiselectComboBox<User> multiselectComboBox = new MultiselectComboBox();
-        multiselectComboBox.setLabel(
-            "Multiselect combo box with ComponentRenderer");
+        multiselectComboBox.setLabel("MultiselectComboBox with ComponentRenderer");
         multiselectComboBox.setPlaceholder("Add");
         multiselectComboBox.setWidth("100%");
         List<User> data = Arrays.asList(
