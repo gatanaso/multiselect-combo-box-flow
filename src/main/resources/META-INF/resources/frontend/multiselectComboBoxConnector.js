@@ -169,6 +169,10 @@ window.Vaadin.Flow.multiselectComboBoxConnector = {
       multiselectComboBox.$server.confirmUpdate(id);
     };
 
+    multiselectComboBox.$connector.setCompactModeLabel = function(compactModeLabel) {
+      multiselectComboBox.compactModeLabelGenerator = () => compactModeLabel;
+    };
+
     const commitPage = function (page, callback) {
       let data = cache[page];
 

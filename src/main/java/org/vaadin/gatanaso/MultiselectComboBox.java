@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.AbstractSinglePropertyField;
@@ -86,7 +87,7 @@ import elemental.json.JsonValue;
  * @author gatanaso
  */
 @Tag("multiselect-combo-box")
-@NpmPackage(value = "multiselect-combo-box", version = "2.4.2")
+@NpmPackage(value = "multiselect-combo-box", version = "2.5.0-beta.2")
 @JsModule("multiselect-combo-box/src/multiselect-combo-box.js")
 @JsModule("./multiselectComboBoxConnector.js")
 public class MultiselectComboBox<T>
@@ -386,6 +387,11 @@ public class MultiselectComboBox<T>
 
     /**
      * Sets the 'compact-mode' property value of the multiselect-combo-box.
+     * <br>
+     * <p>
+     *   When set to {@code true}, the component will use the default compact mode label generator.
+     *   To use a customized label generator, use {@link #setCompactModeLabelGenerator}.
+     * </p>
      *
      * @param compactMode
      *            the boolean value to set
@@ -1066,6 +1072,50 @@ public class MultiselectComboBox<T>
 
     private enum UserProvidedFilter {
         UNDECIDED, YES, NO
+    }
+
+    /**
+     * Sets a compact mode label generator.
+     * <p>
+     *   This method is a convenience method for setting a client-side `compactModeLabelGenerator` function.
+     *   The expression receives as input the array of selected items, named {@code items},
+     *   and should return a String value representing the label. For example:
+     *   <pre>
+     *   {@code return items.length + " " (item.length === 1 ? 'Item' : 'Items');}
+     *   </pre>
+     *   To set a server-side callback for generating the compact mode label use {@link #setCompactModeLabelGenerator(Function)}.
+     * </p>
+     *
+     * @param expression the JavaScript expression that should return the compact mode label for the given list of selected items, not null.
+     */
+    public void setCompactModeLabelGenerator(String expression) {
+        Objects.requireNonNull(expression, "The compact mode label generator expression can not be null");
+
+        String wrappedExpression =
+            "$0.compactModeLabelGenerator = function(items) { "
+                + expression
+            + "}";
+        getElement().executeJs(wrappedExpression);
+    }
+
+    /**
+     * Sets a compact mode label generator.
+     * <p>
+     *   This methods sets a 'server-side' compact mode label generator that is invoked every time the value changes.
+     *   <br/>
+     *   To set a client-side callback for generating the compact mode label user {@link #setCompactModeLabelGenerator(String)}.
+     * </p>
+     *
+     * @param labelGenerator the compact mode label provider to use, not null
+     */
+    public void setCompactModeLabelGenerator(Function<Set<T>, String> labelGenerator) {
+        Objects.requireNonNull(labelGenerator, "The compact mode label generator can not be null");
+        runBeforeClientResponse(ui -> setCompactModeLabel(labelGenerator.apply(getValue()))); // initial state
+        addValueChangeListener(change -> setCompactModeLabel(labelGenerator.apply(getValue())));
+    }
+
+    private void setCompactModeLabel(String label) {
+        getElement().callJsFunction("$connector.setCompactModeLabel", label);
     }
 
     /**
