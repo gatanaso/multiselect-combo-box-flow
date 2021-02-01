@@ -1119,6 +1119,18 @@ public class MultiselectComboBox<T>
     }
 
     /**
+     * Sets the given {@link Function} as unique key data generator.
+     * The default implementation is {@link Object#hashCode()}.
+     *
+     * @param uniqueKeyDataGenerator {@link Function} to generate unique key data
+     */
+    public void setUniqueKeyDataGenerator(Function<T, Object> uniqueKeyDataGenerator) {
+       if (dataCommunicator != null) {
+      	 dataCommunicator.setUniqueKeyDataGenerator(uniqueKeyDataGenerator);
+       }
+    }
+
+    /**
      * Predicate to check {@link MultiselectComboBox} items against user typed
      * strings.
      */
