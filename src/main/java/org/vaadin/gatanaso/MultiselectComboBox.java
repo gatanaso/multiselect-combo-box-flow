@@ -117,6 +117,7 @@ public class MultiselectComboBox<T>
     };
 
     private MultiselectComboBoxDataCommunicator<T> dataCommunicator;
+    private Function<T, Object> uniqueKeyDataGenerator;
     private ItemLabelGenerator<T> itemLabelGenerator = String::valueOf;
     private Registration dataGeneratorRegistration;
 
@@ -928,6 +929,9 @@ public class MultiselectComboBox<T>
                     arrayUpdater, data -> getElement()
                             .callJsFunction("$connector.updateData", data),
                     getElement().getNode());
+            if (uniqueKeyDataGenerator != null) {
+            	dataCommunicator.setUniqueKeyDataGenerator(uniqueKeyDataGenerator);
+            }
         }
 
         scheduleRender();
@@ -1125,6 +1129,7 @@ public class MultiselectComboBox<T>
      * @param uniqueKeyDataGenerator {@link Function} to generate unique key data
      */
     public void setUniqueKeyDataGenerator(Function<T, Object> uniqueKeyDataGenerator) {
+       this.uniqueKeyDataGenerator = uniqueKeyDataGenerator;
        if (dataCommunicator != null) {
       	 dataCommunicator.setUniqueKeyDataGenerator(uniqueKeyDataGenerator);
        }
