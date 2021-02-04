@@ -263,7 +263,7 @@ public class MultiselectComboBox<T>
     @Override
     public void setValue(Set<T> value) {
         if (dataCommunicator == null) {
-            if (value == null) {
+            if (value == null || value.equals(getEmptyValue())) {
                 return;
             } else {
                 throw new IllegalStateException(
