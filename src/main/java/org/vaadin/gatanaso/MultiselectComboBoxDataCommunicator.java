@@ -1,5 +1,7 @@
 package org.vaadin.gatanaso;
 
+import java.util.function.Function;
+
 import com.vaadin.flow.data.provider.ArrayUpdater;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataGenerator;
@@ -15,6 +17,8 @@ import elemental.json.JsonArray;
  * @param <T> the bean type
  */
 public class MultiselectComboBoxDataCommunicator<T> extends DataCommunicator<T> {
+
+	private Function<T, Object> uniqueKeyDataGenerator = Object::hashCode;
 
 	private KeyMapper<T> uniqueKeyMapper = new KeyMapper<T>() {
 
@@ -32,7 +36,7 @@ public class MultiselectComboBoxDataCommunicator<T> extends DataCommunicator<T> 
 
 		@Override
 		protected String createKey() {
-			return String.valueOf(object.hashCode());
+			return String.valueOf(uniqueKeyDataGenerator.apply(object));
 		}
 	};
 
@@ -53,5 +57,15 @@ public class MultiselectComboBoxDataCommunicator<T> extends DataCommunicator<T> 
 
 		super(dataGenerator, arrayUpdater, dataUpdater, stateNode);
 		setKeyMapper(uniqueKeyMapper);
+	}
+
+	/**
+	 * Sets the given {@link Function} as unique key data generator.
+	 * The default implementation is {@link Object#hashCode()}.
+	 *
+	 * @param uniqueKeyDataGenerator {@link Function} to generate unique key data
+	 */
+	public void setUniqueKeyDataGenerator(Function<T, Object> uniqueKeyDataGenerator) {
+		this.uniqueKeyDataGenerator = uniqueKeyDataGenerator;
 	}
 }
