@@ -5,6 +5,8 @@
 
 # MultiselectComboBox
 
+**⚠️ The component is not updated to work with the latest version of Vaadin**
+
 A multi select combo box component for Vaadin Flow.
 
 Integration of of the [multiselect-combo-box](https://github.com/gatanaso/multiselect-combo-box) web component.
