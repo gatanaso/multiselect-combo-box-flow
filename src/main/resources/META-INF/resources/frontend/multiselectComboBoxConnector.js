@@ -17,6 +17,9 @@ window.Vaadin.Flow.multiselectComboBoxConnector = {
     let lastFilter = '';
 
     multiselectComboBox.$connector.initDataConnector = function() {
+      if (_hasDataProvider(multiselectComboBox)) {
+        return;
+      }
       multiselectComboBox.$.comboBox.dataProvider = function (params, callback) {
         if (params.pageSize != multiselectComboBox.$.comboBox.pageSize
             && multiselectComboBox.pageSize != multiselectComboBox.$.comboBox.pageSize) {
@@ -204,6 +207,10 @@ window.Vaadin.Flow.multiselectComboBoxConnector = {
       }
 
       callback(filteredItems, filteredItems.length);
+    };
+
+    const _hasDataProvider = function(multiselectComboBox) {
+      return multiselectComboBox.$.comboBox.dataProvider && typeof multiselectComboBox.$.comboBox.dataProvider === 'function';
     };
 
   }

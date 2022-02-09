@@ -88,7 +88,7 @@ import elemental.json.JsonValue;
  * @author gatanaso
  */
 @Tag("multiselect-combo-box")
-@NpmPackage(value = "multiselect-combo-box", version = "2.5.0-beta.2")
+@NpmPackage(value = "multiselect-combo-box", version = "3.0.0-alpha.1")
 @JsModule("multiselect-combo-box/src/multiselect-combo-box.js")
 @JsModule("./multiselectComboBoxConnector.js")
 public class MultiselectComboBox<T>
@@ -654,6 +654,7 @@ public class MultiselectComboBox<T>
     private void reset() {
         lastFilter = null;
         if (dataCommunicator != null) {
+            dataCommunicator.setPageSize(getPageSize());
             dataCommunicator.setRequestedRange(0, 0);
             dataCommunicator.reset();
         }
@@ -791,7 +792,7 @@ public class MultiselectComboBox<T>
     }
 
     @ClientCallable
-    private void initDataConnector() {
+    private void notifyReady() {
         // init data connector when shadow-dom is ready
         getElement().executeJs("$0.$connector.initDataConnector()");
     }
