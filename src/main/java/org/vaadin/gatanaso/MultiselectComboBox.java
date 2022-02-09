@@ -1082,9 +1082,7 @@ public class MultiselectComboBox<T>
      *   This method is a convenience method for setting a client-side `compactModeLabelGenerator` function.
      *   The expression receives as input the array of selected items, named {@code items},
      *   and should return a String value representing the label. For example:
-     *   <pre>
      *   {@code return items.length + " " (item.length === 1 ? 'Item' : 'Items');}
-     *   </pre>
      *   To set a server-side callback for generating the compact mode label use {@link #setCompactModeLabelGenerator(Function)}.
      * </p>
      *
@@ -1104,7 +1102,7 @@ public class MultiselectComboBox<T>
      * Sets a compact mode label generator.
      * <p>
      *   This methods sets a 'server-side' compact mode label generator that is invoked every time the value changes.
-     *   <br/>
+     *   <br>
      *   To set a client-side callback for generating the compact mode label user {@link #setCompactModeLabelGenerator(String)}.
      * </p>
      *
