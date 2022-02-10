@@ -4,7 +4,6 @@
 [![Stars on vaadin.com/directory](https://img.shields.io/vaadin-directory/star/multiselect-combo-box.svg)](https://vaadin.com/directory/component/multiselect-combo-box)
 
 # MultiselectComboBox
-
 A multi select combo box component for Vaadin Flow.
 
 Integration of of the [multiselect-combo-box](https://github.com/gatanaso/multiselect-combo-box) web component.
@@ -18,7 +17,7 @@ Add the `multiselect-combo-box-flow dependency` to your `pom.xml`:
 <dependency>
    <groupId>org.vaadin.gatanaso</groupId>
    <artifactId>multiselect-combo-box-flow</artifactId>
-   <version>2.5.0</version>
+   <version>2.5.1-rc1</version>
 </dependency>
 ```
 
@@ -110,29 +109,14 @@ multiselectComboBox.setItemLabelGenerator(User::getEmail)
 ```
 
 ## Version information
+* 4.x.x - the version for Vaadin 22+
 * 3.x.x - the version for Vaadin 16 and Vaadin 15
 * 2.x.x - the version for Vaadin 14 (LTS)
 * 1.x.x. - the version for Vaadin 13 and Vaadin 12
 
-### Vaadin 12 support
-To use this component in a Vaadin 12+ project, 
-explicitly override the `vaadin-combo-box` dependency version by adding the following to your pom.xml file:
-```xml
-<dependency>
-	<groupId>org.webjars.bowergithub.vaadin</groupId>
-	<artifactId>vaadin-combo-box</artifactId>
-	<version>4.2.7</version>
-</dependency>
-```
-Optionally, to always use the latest version, a range can be specified as follows:
-```xml
-<version>[4.2.7, 5)</version>
-```
-
 ## Branch information
-* `master` the latest version for Vaadin 16 and Vaadin 15
+* `master` the latest version for Vaadin 22+
 * `V14` the version for Vaadin 14 (LTS)
-* `V13` the version for Vaadin 13 and Vaadin 12
 
 ## Running demos locally
 
@@ -142,5 +126,5 @@ Optionally, to always use the latest version, a range can be specified as follow
 1. Navigate to http://localhost:8080 to view the demo.
 
 ## Web Component
-The `<multiselect-combo-box>` web component is available on [webcomponents.org](https://www.webcomponents.org/element/multiselect-combo-box), 
+The `<multiselect-combo-box>` web component is available on [npm](https://www.npmjs.com/package/multiselect-combo-box), 
 the [Vaadin Directory](https://vaadin.com/directory/component/gatanasomultiselect-combo-box) and [GitHub](https://github.com/gatanaso/multiselect-combo-box).
