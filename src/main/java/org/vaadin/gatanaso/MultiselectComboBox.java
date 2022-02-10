@@ -88,7 +88,7 @@ import elemental.json.JsonValue;
  * @author gatanaso
  */
 @Tag("multiselect-combo-box")
-@NpmPackage(value = "multiselect-combo-box", version = "3.0.0-alpha.1")
+@NpmPackage(value = "multiselect-combo-box", version = "3.0.0-alpha.2")
 @JsModule("multiselect-combo-box/src/multiselect-combo-box.js")
 @JsModule("./multiselectComboBoxConnector.js")
 public class MultiselectComboBox<T>
