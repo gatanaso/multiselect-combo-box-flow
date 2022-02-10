@@ -118,13 +118,6 @@ multiselectComboBox.setItemLabelGenerator(User::getEmail)
 * `master` the latest version for Vaadin 22+
 * `V14` the version for Vaadin 14 (LTS)
 
-## Running demos locally
-
-1. Fork the `multiselect-combo-box-flow` repository and clone it locally.
-1. Build the project: `mvn clean install`
-1. Start the test/demo server: `mvn jetty:run`
-1. Navigate to http://localhost:8080 to view the demo.
-
 ## Web Component
 The `<multiselect-combo-box>` web component is available on [npm](https://www.npmjs.com/package/multiselect-combo-box), 
 the [Vaadin Directory](https://vaadin.com/directory/component/gatanasomultiselect-combo-box) and [GitHub](https://github.com/gatanaso/multiselect-combo-box).

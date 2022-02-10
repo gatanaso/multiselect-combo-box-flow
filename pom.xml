@@ -132,20 +132,6 @@
 					</execution>
 				</executions>
 			</plugin>
-            <plugin>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-maven-plugin</artifactId>
-                <version>9.4.15.v20190215</version>
-                <configuration>
-                    <scanIntervalSeconds>3</scanIntervalSeconds>
-                    <!-- Use test scope because the UI/demo classes are in 
-                        the test package. -->
-                    <useTestScope>true</useTestScope>
-                    <supportedPackagings>
-                    <supportedPackaging>jar</supportedPackaging>
-                    </supportedPackagings>
-                </configuration>
-            </plugin>
         </plugins>
     </build>
 
