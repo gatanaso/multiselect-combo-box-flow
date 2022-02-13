@@ -17,7 +17,7 @@ Add the `multiselect-combo-box-flow dependency` to your `pom.xml`:
 <dependency>
    <groupId>org.vaadin.gatanaso</groupId>
    <artifactId>multiselect-combo-box-flow</artifactId>
-   <version>4.0.0-rc1</version>
+   <version>4.0.0-rc2</version>
 </dependency>
 ```
 
@@ -117,13 +117,6 @@ multiselectComboBox.setItemLabelGenerator(User::getEmail)
 ## Branch information
 * `master` the latest version for Vaadin 22+
 * `V14` the version for Vaadin 14 (LTS)
-
-## Running demos locally
-
-1. Fork the `multiselect-combo-box-flow` repository and clone it locally.
-1. Build the project: `mvn clean install`
-1. Start the test/demo server: `mvn jetty:run`
-1. Navigate to http://localhost:8080 to view the demo.
 
 ## Web Component
 The `<multiselect-combo-box>` web component is available on [npm](https://www.npmjs.com/package/multiselect-combo-box), 
